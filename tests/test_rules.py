@@ -111,3 +111,66 @@ def test_other_words(khmer, expected):
 
 def test_empty_word():
     assert romanize_word("") == ""
+
+
+# Geographic Department names of Cambodian provinces (the "chat" style), as one word.
+# Preăh Vihéar, Rotanak Kiri and Krong Preah Sihanouk do not follow the system's rules
+# and are left out.
+CHAT_PROVINCES = {
+    "បន្ទាយមានជ័យ": "banteaymeanchey",
+    "កំពង់ចាម": "kampongcham",
+    "កំពង់ឆ្នាំង": "kampongchhnang",
+    "កំពង់ស្ពឺ": "kampongspueu",
+    "កំពង់ធំ": "kampongthum",
+    "កំពត": "kampot",
+    "កណ្ដាល": "kandal",
+    "កោះកុង": "kaohkong",
+    "ក្រចេះ": "kracheh",
+    "មណ្ឌលគិរី": "mondolkiri",
+    "ភ្នំពេញ": "phnumpenh",
+    "ពោធិ៍សាត់": "pousat",
+    "សៀមរាប": "siemreab",
+    "ស្ទឹងត្រែង": "stuengtraeng",
+    "ស្វាយរៀង": "svayrieng",
+    "តាកែវ": "takaev",
+    "ឧត្តរមានជ័យ": "otdarmeanchey",
+    "កែប": "kaeb",
+    "ប៉ៃលិន": "pailin",
+    "ត្បូងឃ្មុំ": "tboungkhmum",
+}
+
+# The Geographic Department column of the Wikipedia examples.
+CHAT_WIKIPEDIA = {
+    "អក្សរខ្មែរ": "aksarkhmaer",
+    "កម្ពុជា": "kampuchea",
+    "មណ្ឌល": "mondol",
+    "ពន្លឺ": "ponlueu",
+    "សន្តិភាព": "santepheap",
+    "ជំនឿ": "chumnoea",
+    "ទៅ": "tov",
+}
+
+
+@pytest.mark.parametrize(("khmer", "expected"), CHAT_PROVINCES.items())
+def test_chat_province_names(khmer, expected):
+    assert romanize_word(khmer, "chat") == expected
+
+
+@pytest.mark.parametrize(("khmer", "expected"), CHAT_WIKIPEDIA.items())
+def test_chat_wikipedia_examples(khmer, expected):
+    assert romanize_word(khmer, "chat") == expected
+
+
+def test_chat_drops_letters_marked_silent():
+    # ធិ៍ carries toandakhiat; ungegn keeps it (note 9), chat follows the pronunciation.
+    assert romanize_word("ពោធិ៍", "ungegn") == "poŭthĭ"
+    assert romanize_word("ពោធិ៍", "chat") == "pou"
+
+
+def test_chat_has_no_apostrophes():
+    assert romanize_word("ចង្អៀត", "chat") == "changiet"
+
+
+def test_chat_uses_ae_for_ae_in_both_series():
+    # The Geographic Department writes "Prey Veaeng"; people type "veng" or "vaeng".
+    assert romanize_word("ព្រៃវែង", "chat") == "preyvaeng"

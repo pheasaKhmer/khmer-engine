@@ -1,7 +1,13 @@
 """Rule-based romanization of Khmer, from the spelling alone.
 
-The tables follow the UNGEGN report on Khmer romanization (version 4.0, September 2013,
-https://www.eki.ee/wgrs/rom1_km.pdf). Table and note numbers in comments refer to it.
+Two styles:
+
+- "ungegn" follows the UNGEGN report on Khmer romanization (version 4.0, September 2013,
+  https://www.eki.ee/wgrs/rom1_km.pdf). Table and note numbers in comments refer to it.
+- "chat" follows the Geographic Department system Cambodia has used since 1997 (the
+  report's "Other systems of romanization", and Wikipedia's tables for the gaps): the
+  same consonants without apostrophes, and vowels without diacritics. It is the closest
+  standard to how people type Khmer in Latin letters.
 """
 
 from typing import Literal
@@ -9,7 +15,7 @@ from typing import Literal
 from khmer_engine import script
 from khmer_engine.syllables import Syllable, syllables
 
-Style = Literal["ungegn"]
+Style = Literal["ungegn", "chat"]
 
 # Tables I and II. Initial and final consonants use the same letters.
 _CONSONANTS = {
@@ -76,6 +82,52 @@ _UNGEGN_INDEPENDENT = {
     "ឯ": "ê", "ឰ": "ai", "ឱ": "aô", "ឲ": "aô", "ឳ": "au",
 }  # fmt: skip
 
+# Geographic Department values. Two cells differ from that system to match how people
+# type: ែ is "ae" in both series (the system has "eae" in the o-series) and ិះ is "ih"
+# in the o-series (the system has "is").
+_CHAT_NUCLEI: dict[str, tuple[str, str]] = {
+    _INHERENT: ("a", "o"),
+    _INHERENT_BANTOC: ("a", "o"),
+    "ា": ("a", "ea"),
+    _AA_BANTOC: ("a", "oa|ea"),
+    _SAMYOK: ("a", "oa|ea"),
+    _SAMYOK_Y: ("ai", "ey"),
+    "ៈ": ("ak", "eak"),
+    "ិ": ("e", "i"),
+    "ី": ("ei", "i"),
+    "ឹ": ("oe", "ue"),
+    "ឺ": ("eu", "ueu"),
+    "ុ": ("o", "u"),
+    "ូ": ("ou", "u"),
+    "ួ": ("uo", "uo"),
+    "ើ": ("aeu", "eu"),
+    "ឿ": ("oea", "oea"),
+    "ៀ": ("ie", "ie"),
+    "េ": ("e", "e"),
+    "ែ": ("ae", "ae"),
+    "ៃ": ("ai", "ey"),
+    "ោ": ("ao", "ou"),
+    "ៅ": ("au", "ov"),
+    "ំ": ("am", "um"),
+    "ុំ": ("om", "um"),
+    "ាំ": ("am", "oam"),
+    _AAM_NG: ("ang", "eang"),
+    "ះ": ("ah", "eah"),
+    "ិះ": ("eh", "ih"),
+    "ុះ": ("oh", "uh"),
+    "េះ": ("eh", "eh"),
+    "ោះ": ("aoh", "uoh"),
+}
+
+_CHAT_INDEPENDENT = {
+    "ឣ": "a", "ឤ": "a", "ឥ": "e", "ឦ": "ei", "ឧ": "o", "ឨ": "ok", "ឩ": "ou",
+    "ឪ": "au", "ឫ": "rue", "ឬ": "rueu", "ឭ": "lue", "ឮ": "lueu",
+    "ឯ": "ae", "ឰ": "ai", "ឱ": "ao", "ឲ": "ao", "ឳ": "au",
+}  # fmt: skip
+
+_NUCLEI = {"ungegn": _UNGEGN_NUCLEI, "chat": _CHAT_NUCLEI}
+_INDEPENDENT = {"ungegn": _UNGEGN_INDEPENDENT, "chat": _CHAT_INDEPENDENT}
+
 # Note 6: the o-series value is eă before these finals, otherwise oă.
 _EA_FINALS = frozenset(("k", "kh", "ng", "h"))
 
@@ -103,16 +155,16 @@ def _nucleus_key(syllable: Syllable) -> tuple[str, int]:
     return vowel, 0
 
 
-def _vowel(syllable: Syllable, final_letters: list[str]) -> tuple[str, int]:
+def _vowel(syllable: Syllable, final_letters: list[str], style: Style) -> tuple[str, int]:
     """Romanize the nucleus. Returns the text and how many finals it already spells."""
+    nuclei = _NUCLEI[style]
+    column = 0 if syllable.series == "a" else 1
     key, spelled = _nucleus_key(syllable)
-    if key in _UNGEGN_NUCLEI:
-        a_value, o_value = _UNGEGN_NUCLEI[key]
-        value = a_value if syllable.series == "a" else o_value
+    if key in nuclei:
+        value = nuclei[key][column]
     else:
         # Combinations the tables leave out (ិះ, ើះ, ...): the vowel, then m or h.
-        column = 0 if syllable.series == "a" else 1
-        value = "".join(_UNGEGN_NUCLEI[v][column] for v in syllable.vowel)
+        value = "".join(nuclei[v][column] for v in syllable.vowel)
         if script.NIKAHIT in syllable.signs:
             value += "m"
         if script.REAHMUK in syllable.signs:
@@ -131,7 +183,13 @@ def _subscript_ta(onset: tuple[str, ...], index: int, previous: Syllable | None)
     return "t" if before_ro or after_no else "d"
 
 
-def _onset(syllable: Syllable, previous: Syllable | None) -> str:
+def _consonant(letter: str, style: Style) -> str:
+    if letter == "អ" and style == "chat":
+        return ""
+    return _CONSONANTS[letter]
+
+
+def _onset(syllable: Syllable, previous: Syllable | None, style: Style) -> str:
     out = []
     for i, letter in enumerate(syllable.onset):
         written_below = i > 0 or syllable.subscript_onset
@@ -146,18 +204,21 @@ def _onset(syllable: Syllable, previous: Syllable | None) -> str:
         elif letter == "អ" and previous is None and syllable.onset == ("អ",) and syllable.vowel:
             pass  # note 5: word-initial ' before a vowel is omitted
         else:
-            out.append(_CONSONANTS[letter])
+            out.append(_consonant(letter, style))
     return "".join(out)
 
 
-def _syllable(syllable: Syllable, previous: Syllable | None) -> str:
-    finals = [_CONSONANTS[f] for f in syllable.finals]
+def _syllable(syllable: Syllable, previous: Syllable | None, style: Style) -> str:
+    if style == "chat" and syllable.silent:
+        return ""  # toandakhiat: written, not pronounced
+    silent_finals = style == "chat" and syllable.silent_finals
+    finals = [] if silent_finals else [_consonant(f, style) for f in syllable.finals]
     if syllable.independent:
-        head = _UNGEGN_INDEPENDENT[syllable.independent]
+        head = _INDEPENDENT[style][syllable.independent]
         spelled = 0
     else:
-        vowel, spelled = _vowel(syllable, finals)
-        head = _onset(syllable, previous) + vowel
+        vowel, spelled = _vowel(syllable, finals, style)
+        head = _onset(syllable, previous, style) + vowel
     robat = "r" if syllable.robat else ""  # note 7
     return head + robat + "".join(finals[spelled:])
 
@@ -167,7 +228,7 @@ def romanize_syllables(parts: list[Syllable], style: Style = "ungegn") -> str:
     out = []
     previous = None
     for syllable in parts:
-        out.append(_syllable(syllable, previous))
+        out.append(_syllable(syllable, previous, style))
         previous = syllable
     return "".join(out)
 
