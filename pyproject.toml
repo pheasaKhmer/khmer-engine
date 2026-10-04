@@ -26,6 +26,9 @@ Repository = "https://github.com/pheasaKhmer/khmer-engine"
 Issues = "https://github.com/pheasaKhmer/khmer-engine/issues"
 
 [dependency-groups]
+data = [
+    "pyarrow>=25.0.1",
+]
 dev = [
     "pytest>=9.1.1",
     "ruff>=0.16.9",

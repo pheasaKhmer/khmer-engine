@@ -1,4 +1,4 @@
-.PHONY: check lint format test
+.PHONY: check lint format test data
 
 check: lint test
 
@@ -12,3 +12,6 @@ format:
 
 test:
 	uv run pytest
+
+data:
+	uv run --group data python scripts/build_data.py
