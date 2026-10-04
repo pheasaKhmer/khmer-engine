@@ -18,7 +18,7 @@ classifiers = [
     "Topic :: Text Processing :: Linguistic",
     "Typing :: Typed",
 ]
-dependencies = []
+dependencies = ["pheasa>=0.1.0"]
 
 [project.urls]
 Homepage = "https://github.com/pheasaKhmer/khmer-engine"
@@ -30,6 +30,10 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.16.9",
 ]
+
+# pheasa is not on PyPI yet. Remove this once it is published.
+[tool.uv.sources]
+pheasa = { git = "https://github.com/pheasaKhmer/pheasa", rev = "31c5b83d3685a82be53dc87fbd6c3a72a1299040" }
 
 [build-system]
 requires = ["hatchling"]
