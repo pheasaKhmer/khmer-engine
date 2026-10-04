@@ -45,6 +45,8 @@ class Cluster:
             or self.is_independent_vowel
             or bool(self.vowel)
             or any(sign in script.VOCALIC_SIGNS for sign in self.signs)
+            # ហ្ឫទ័យ: an independent vowel written as a subscript is the vowel.
+            or any(sub in script.INDEPENDENT_VOWELS for sub in self.subscripts)
         )
 
     @property
@@ -137,8 +139,9 @@ class Syllable:
         if not self.onset:
             return "a"
         result = script.series(self.onset[0])
-        if len(self.onset) > 1 and self.onset[1] not in script.SERIES_NEUTRAL_SUBSCRIPTS:
-            result = script.series(self.onset[1])
+        subscript = self.onset[1] if len(self.onset) > 1 else ""
+        if subscript in script.CONSONANTS and subscript not in script.SERIES_NEUTRAL_SUBSCRIPTS:
+            result = script.series(subscript)
         if self.shifter == script.MUUSIKATOAN:
             return "a"
         if self.shifter == script.TRIISAP:
@@ -251,10 +254,14 @@ def _nucleus_signs(signs: str) -> str:
 
 
 def _start(cluster: Cluster, text: str, onset: tuple[str, ...], *, subscript: bool):
-    independent = cluster.base if cluster.is_independent_vowel and not subscript else ""
+    independent = ""
+    if cluster.is_independent_vowel and not subscript:
+        independent, onset = cluster.base, ()
+    elif onset[:1] and onset[0] in script.INDEPENDENT_VOWELS:
+        independent, onset = onset[0], onset[1:]  # អម្ឫត: ឫ starts the second syllable
     return _SyllableBuilder(
         text=text,
-        onset=() if independent else onset,
+        onset=onset,
         independent=independent,
         shifter=cluster.shifter,
         vowel=cluster.vowel,

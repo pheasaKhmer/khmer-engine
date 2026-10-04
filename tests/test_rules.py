@@ -174,3 +174,17 @@ def test_chat_has_no_apostrophes():
 def test_chat_uses_ae_for_ae_in_both_series():
     # The Geographic Department writes "Prey Veaeng"; people type "veng" or "vaeng".
     assert romanize_word("ព្រៃវែង", "chat") == "preyvaeng"
+
+
+@pytest.mark.parametrize(
+    ("khmer", "ungegn", "chat"),
+    [
+        # An independent vowel written as a subscript is the syllable's vowel.
+        ("ហ្ឫទ័យ", "hrœ\u0306toăy", "hruetey"),
+        ("សុហ្ឫទ", "sŏhrœ\u0306t", "sohruet"),
+        ("អម្ឫត", "'âmrœ\u0306t", "amruet"),
+    ],
+)
+def test_independent_vowel_as_subscript(khmer, ungegn, chat):
+    assert romanize_word(khmer, "ungegn") == ungegn
+    assert romanize_word(khmer, "chat") == chat

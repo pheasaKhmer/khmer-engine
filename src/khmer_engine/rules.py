@@ -203,6 +203,8 @@ def _onset(syllable: Syllable, previous: Syllable | None, style: Style) -> str:
             out.append(_subscript_ta(syllable.onset, i, previous))
         elif letter == "អ" and previous is None and syllable.onset == ("អ",) and syllable.vowel:
             pass  # note 5: word-initial ' before a vowel is omitted
+        elif letter in script.INDEPENDENT_VOWELS:
+            out.append(_INDEPENDENT[style][letter])  # written as a subscript: ហ្ឫទ័យ
         else:
             out.append(_consonant(letter, style))
     return "".join(out)
@@ -218,6 +220,8 @@ def _syllable(syllable: Syllable, previous: Syllable | None, style: Style) -> st
         spelled = 0
     else:
         vowel, spelled = _vowel(syllable, finals, style)
+        if not syllable.vowel and set(syllable.onset) & script.INDEPENDENT_VOWELS:
+            vowel = ""  # the subscript independent vowel is the nucleus
         head = _onset(syllable, previous, style) + vowel
     robat = "r" if syllable.robat else ""  # note 7
     return head + robat + "".join(finals[spelled:])

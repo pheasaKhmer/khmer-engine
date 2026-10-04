@@ -107,3 +107,16 @@ def test_series(word, expected):
 
 def test_empty_word():
     assert syllables("") == []
+
+
+def test_independent_vowel_as_subscript_is_a_nucleus():
+    hrue, toay = syllables("ហ្ឫទ័យ")
+    assert hrue.onset == ("ហ", "ឫ")
+    assert hrue.series == "a"
+    assert toay.finals == ("យ",)
+
+
+def test_subscript_independent_vowel_can_start_a_syllable():
+    am, rut = syllables("អម្ឫត")
+    assert am.finals == ("ម",)
+    assert (rut.onset, rut.independent, rut.finals) == ((), "ឫ", ("ត",))
