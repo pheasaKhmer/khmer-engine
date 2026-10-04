@@ -63,3 +63,12 @@ def test_too_many_fields_is_an_error(tmp_path):
     (tmp_path / "lexicon.tsv").write_text("ទេ\t1\tt ee\textra\n", encoding="utf-8")
     with pytest.raises(ValueError, match=r"lexicon.tsv:1"):
         Lexicon.load(tmp_path)
+
+
+def test_sample_ships_with_the_package():
+    lexicon = Lexicon.sample()
+    assert len(lexicon) >= 3000
+    assert lexicon.bigrams
+    # Common words are there with pronunciations, and ranked sensibly.
+    assert lexicon.entries["ខ្ញុំ"].pronunciations == ("k ɲ o m",)
+    assert lexicon.logprob("ទេ") > lexicon.logprob("សប្បាយ")

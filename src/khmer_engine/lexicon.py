@@ -13,6 +13,7 @@ Words are normalized with pheasa when loaded, so lookups must normalize too.
 import math
 from collections.abc import Iterator
 from dataclasses import dataclass, field
+from importlib.resources import files
 from pathlib import Path
 
 from pheasa import normalize
@@ -89,3 +90,8 @@ class Lexicon:
                 key = (normalize(first), normalize(second))
                 bigrams[key] = bigrams.get(key, 0) + int(count)
         return cls(entries, bigrams)
+
+    @classmethod
+    def sample(cls) -> "Lexicon":
+        """The small lexicon shipped with the package, so everything works offline."""
+        return cls.load(Path(str(files("khmer_engine") / "data" / "sample")))

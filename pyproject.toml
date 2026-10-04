@@ -4,7 +4,8 @@ dynamic = ["version"]
 description = "Convert chat-style romanized Khmer to Khmer script and back."
 readme = "README.md"
 requires-python = ">=3.11"
-license = "MIT"
+# Code is MIT. The bundled sample data keeps the licenses of its sources (data/README.md).
+license = "MIT AND CC-BY-4.0 AND ODC-By-1.0"
 license-files = ["LICENSE"]
 authors = [{ name = "Samputhy Khim" }]
 maintainers = [{ name = "Samputhy Khim" }]
