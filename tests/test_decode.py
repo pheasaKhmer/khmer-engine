@@ -38,7 +38,7 @@ def decoder():
         "srolanh": [Choice("ស្រឡាញ់", 0.0, "pronunciation")],
         "luy": [Choice("លុយ", 0.0, "pronunciation")],
     }
-    return Decoder(lexicon, lambda typed: table.get(typed, []))
+    return Decoder(lexicon, lambda typed, whole: table.get(typed, []))
 
 
 def test_the_next_word_decides_between_homophones(decoder):
@@ -55,3 +55,12 @@ def test_tokens_put_the_chosen_reading_first(decoder):
 
 def test_text_without_any_reading_is_kept(decoder):
     assert decoder.convert("xyz bong").text == "xyz bong"
+
+
+def test_phrase_positions_count_letters_without_spaces():
+    (phrase,) = _segments("or kunbong")
+    assert phrase.offsets() == [0, 2, 9]
+    assert phrase.typed(0, 5) == "or kun"
+    assert phrase.characters(0, 5) == (0, 6)
+    assert phrase.typed(5, 9) == "bong"
+    assert phrase.characters(5, 9) == (6, 10)

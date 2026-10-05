@@ -29,13 +29,14 @@ class Engine:
         self.english = read_english() if english is None else english
         self.decoder = Decoder(self.lexicon, self.choices, settings)
 
-    def choices(self, typed: str) -> list[Choice]:
-        """Every reading of one span of typed text, with its emission score."""
+    def choices(self, typed: str, whole: bool = True) -> list[Choice]:
+        """Every reading of one span of typed text, with its emission score. A piece of a
+        typed word (`whole` false) only matches keys exactly and is never English."""
         out = [
             Choice(word, emission, form.source, form.spelling)
-            for word, (emission, form) in self.matcher.emissions(typed).items()
+            for word, (emission, form) in self.matcher.emissions(typed, fuzzy_keys=whole).items()
         ]
-        if typed.lower() in self.english:
+        if whole and typed.lower() in self.english:
             out.append(Choice(typed, 0.0, "english", typed.lower()))
         return out
 

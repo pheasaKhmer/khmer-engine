@@ -62,3 +62,24 @@ def test_english_words_stay_in_latin_letters(engine, typed, expected):
 def test_words_on_the_english_list_can_still_be_khmer():
     # Keeping a word in English has a cost, so a good Khmer reading in context wins.
     assert Engine(english=frozenset({"te"})).convert("ot mean te") == "អត់មានទេ"
+
+
+@pytest.mark.parametrize(
+    ("typed", "expected"),
+    [
+        ("soksabayte", "សុខសប្បាយទេ"),
+        ("orkunbong", "អរគុណបង"),
+        ("nhambayhoynov", "ញ៉ាំបាយហើយនៅ"),
+    ],
+)
+def test_words_typed_without_spaces_are_split(engine, typed, expected):
+    assert engine.convert(typed) == expected
+
+
+def test_split_tokens_point_inside_the_typed_word(engine):
+    tokens = engine.analyze("ot orkunbong").tokens
+    assert [(t.typed, t.start, t.end) for t in tokens] == [
+        ("ot", 0, 2),
+        ("orkun", 3, 8),
+        ("bong", 8, 12),
+    ]

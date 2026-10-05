@@ -5,7 +5,9 @@ phrase is decoded on its own; punctuation, digits, line breaks and Khmer script 
 phrases are copied through unchanged.
 
 Inside a phrase, a word may be typed across several Latin words ("or kun" for អរគុណ),
-so a span covers one to three of them. Every span offers some choices (from the
+so a span covers one to three of them. Several words may also be typed as one
+("soksabayte"), so a span can be a piece of a typed word; pieces only match keys
+exactly and pay a cost for each split. Every span offers some choices (from the
 `choices` callback), and the search picks the sequence with the best total of
 emission scores (how well each choice fits its typed letters) and bigram language
 model scores (how likely each word is after the one before). Keeping several
@@ -62,12 +64,17 @@ class Settings:
     language_model: float = 0.7  # weight of the bigram log probability
     english: float = 7.0  # cost of keeping a word in English, about a mid-frequency word
     join: float = 1.0  # cost per space inside a span ("or kun")
+    split: float = 1.0  # cost per split inside a typed word ("soksabay|te")
     max_words_per_span: int = 3
+    min_split_length: int = 4  # shorter typed words are never split
+    max_piece_length: int = 12
     choices_per_span: int = 8
     beam: int = 8
 
 
-ChoiceSource = Callable[[str], list[Choice]]
+# Called with the typed text of a span, and whether the span is made of whole typed
+# words (True) or is a piece of one (False); pieces should only match exactly.
+ChoiceSource = Callable[[str, bool], list[Choice]]
 
 
 @dataclass
@@ -75,7 +82,7 @@ class _Hypothesis:
     score: float
     previous: str | None  # last Khmer word, for the bigram
     back: "_Hypothesis | None" = None
-    span: tuple[int, int] = (0, 0)  # word indexes in the phrase
+    span: tuple[int, int] = (0, 0)  # letter positions in the phrase
     choice: Choice | None = None
 
     def path(self) -> list["_Hypothesis"]:
@@ -90,7 +97,35 @@ class _Hypothesis:
 
 @dataclass
 class _Phrase:
+    """Typed words separated by spaces. Positions count letters, ignoring the spaces."""
+
     words: list[tuple[str, int, int]] = field(default_factory=list)  # (text, start, end)
+
+    def offsets(self) -> list[int]:
+        """The position where each word starts, then the end of the phrase."""
+        out = [0]
+        for text, _, _ in self.words:
+            out.append(out[-1] + len(text))
+        return out
+
+    def typed(self, start: int, end: int) -> str:
+        """The typed text between two positions, with the spaces between words."""
+        pieces = []
+        for (text, _, _), offset in zip(self.words, self.offsets(), strict=False):
+            piece = text[max(start - offset, 0) : max(end - offset, 0)]
+            if piece:
+                pieces.append(piece)
+        return " ".join(pieces)
+
+    def characters(self, start: int, end: int) -> tuple[int, int]:
+        """Character offsets in the input of the text between two positions."""
+        offsets = self.offsets()
+        first = max(i for i, o in enumerate(offsets[:-1]) if o <= start)
+        last = max(i for i, o in enumerate(offsets[:-1]) if o < end)
+        return (
+            self.words[first][1] + start - offsets[first],
+            self.words[last][1] + end - offsets[last],
+        )
 
 
 def _segments(text: str) -> Iterator[str | _Phrase]:
@@ -143,34 +178,52 @@ class Decoder:
             score = self.lexicon.bigram_logprob(previous, choice.text)
         return self.settings.language_model * score
 
-    def _spans(self, phrase: _Phrase) -> dict[tuple[int, int], list[Choice]]:
-        out = {}
+    def _ranked(self, typed: str, whole: bool) -> list[Choice]:
+        ranked = sorted(self.choices(typed, whole), key=lambda c: -c.emission)
+        return ranked[: self.settings.choices_per_span]
+
+    def _spans(self, phrase: _Phrase) -> dict[tuple[int, int], tuple[list[Choice], float]]:
+        """Every span with its choices and its cost."""
+        settings = self.settings
+        offsets = phrase.offsets()
         n = len(phrase.words)
-        for start in range(n):
-            for end in range(start + 1, min(start + self.settings.max_words_per_span, n) + 1):
-                typed = "".join(w[0] for w in phrase.words[start:end])
-                ranked = sorted(self.choices(typed), key=lambda c: -c.emission)
-                if ranked:
-                    out[start, end] = ranked[: self.settings.choices_per_span]
-        return out
+        out = {}
+        for i in range(n):
+            for j in range(i + 1, min(i + settings.max_words_per_span, n) + 1):
+                typed = "".join(w[0] for w in phrase.words[i:j])
+                out[offsets[i], offsets[j]] = (
+                    self._ranked(typed, True),
+                    settings.join * (j - i - 1),
+                )
+        for i, (word, _, _) in enumerate(phrase.words):
+            if len(word) < settings.min_split_length:
+                continue
+            for a in range(len(word)):
+                for b in range(a + 2, min(a + settings.max_piece_length, len(word)) + 1):
+                    if a == 0 and b == len(word):
+                        continue  # the whole word is above
+                    # Charge each split once, on the piece that ends inside the word.
+                    cost = settings.split if b < len(word) else 0.0
+                    out[offsets[i] + a, offsets[i] + b] = (self._ranked(word[a:b], False), cost)
+        return {span: value for span, value in out.items() if value[0]}
 
     def _search(self, phrase: _Phrase) -> tuple[list[_Hypothesis], dict]:
         spans = self._spans(phrase)
-        n = len(phrase.words)
+        starting: dict[int, list[tuple[int, list[Choice], float]]] = {}
+        for (start, end), (choices, cost) in spans.items():
+            starting.setdefault(start, []).append((end, choices, cost))
+        length = phrase.offsets()[-1]
         beams: dict[int, list[_Hypothesis]] = {0: [_Hypothesis(0.0, None)]}
-        for position in range(n):
-            for (start, end), choices in spans.items():
-                if start != position or position not in beams:
-                    continue
-                cost = self.settings.join * (end - start - 1)
-                for hypothesis in beams[position]:
+        for position in range(length):
+            for end, choices, cost in starting.get(position, ()):
+                for hypothesis in beams.get(position, ()):
                     for choice in choices:
                         score = hypothesis.score + choice.emission - cost
                         score += self._language_model(hypothesis.previous, choice)
                         previous = choice.text if choice.is_khmer else None
-                        new = _Hypothesis(score, previous, hypothesis, (start, end), choice)
+                        new = _Hypothesis(score, previous, hypothesis, (position, end), choice)
                         self._add(beams, end, new)
-        return beams.get(n, []), spans
+        return beams.get(length, []), spans
 
     def _add(self, beams: dict[int, list[_Hypothesis]], position: int, new: _Hypothesis) -> None:
         beam = beams.setdefault(position, [])
@@ -191,12 +244,12 @@ class Decoder:
             start, end = step.span
             assert step.choice is not None
             others = sorted(
-                (c for c in spans[start, end] if c != step.choice),
+                (c for c in spans[start, end][0] if c != step.choice),
                 key=lambda c: -(c.emission + self._language_model(previous, c)),
             )
-            words = phrase.words[start:end]
-            typed = " ".join(w[0] for w in words)
-            tokens.append(Token(typed, words[0][1], words[-1][2], [step.choice, *others][:n]))
+            first, last = phrase.characters(start, end)
+            choices = [step.choice, *others][:n]
+            tokens.append(Token(phrase.typed(start, end), first, last, choices))
             previous = step.previous
         return tokens
 
