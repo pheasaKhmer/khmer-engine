@@ -36,10 +36,15 @@ OPEN_VOWELS = {"ɑɑ": "or", "ɔɔ": "or"}
 # Rimes typed differently from the sum of their parts: ទៅ is "tov", not "teuv".
 RIMES = {("ɨ", "w"): "ov", ("ɨɨ", "w"): "ov"}
 
+# A doubled consonant is typed once: សប្បាយ is "sabay", not "sapbay", and ចិត្ត is
+# "cheto". These are a coda and the next onset that Khmer writes as one letter twice
+# (ប final is pronounced p). Other pairs keep both letters: បាត់ដំបង is "Battambang".
+_DOUBLED = {("p", "ɓ")}
+
 SILENCES = frozenset(("sil", "pau"))
 
 
-def _syllable(phones: list[str]) -> str:
+def _syllable(phones: list[str], next_onset: str = "") -> str:
     vowel_at = next((i for i, p in enumerate(phones) if p in VOWELS), None)
     if vowel_at is None:
         return "".join(ONSETS[p] for p in phones)
@@ -49,16 +54,22 @@ def _syllable(phones: list[str]) -> str:
         return out + RIMES[(vowel, *coda)]
     if not coda and vowel in OPEN_VOWELS:
         return out + OPEN_VOWELS[vowel]
+    if coda and (coda[-1] == next_onset or (coda[-1], next_onset) in _DOUBLED):
+        coda = coda[:-1]
     return out + VOWELS[vowel] + "".join(CODAS[p] for p in coda)
 
 
 def to_chat(transcription: str) -> str:
     """Chat-style Latin spelling of a phonemic transcription."""
+    syllables = [
+        [p for p in syllable.split() if p not in SILENCES]
+        for syllable in transcription.split(" . ")
+    ]
     out = []
-    for syllable in transcription.split(" . "):
-        phones = [p for p in syllable.split() if p not in SILENCES]
+    for i, phones in enumerate(syllables):
+        following = syllables[i + 1][0] if i + 1 < len(syllables) and syllables[i + 1] else ""
         try:
-            out.append(_syllable(phones))
+            out.append(_syllable(phones, following))
         except KeyError as error:
             raise ValueError(f"unknown phone {error.args[0]!r} in {transcription!r}") from None
     return "".join(out)
