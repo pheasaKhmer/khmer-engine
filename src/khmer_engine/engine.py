@@ -1,5 +1,6 @@
 """The conversion engine: lexicon, matcher and decoder together."""
 
+import gc
 import math
 from dataclasses import dataclass
 from functools import cached_property
@@ -64,6 +65,10 @@ class Engine:
         self.transliterator = Transliterator.from_lexicon(self.lexicon)
         self.user = user or UserDictionary()
         self._choice_cache: dict[tuple[str, bool], list[Choice]] = {}
+        # The lexicon and indexes never change after this point. Taking them out of
+        # garbage collection keeps a full collection, which would walk millions of
+        # objects, from pausing a keystroke for tens of milliseconds.
+        gc.freeze()
         self.decoder = Decoder(self.lexicon, self.choices, settings)
 
     def choices(self, typed: str, whole: bool = True) -> list[Choice]:
