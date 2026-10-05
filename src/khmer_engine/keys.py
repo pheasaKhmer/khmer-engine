@@ -68,8 +68,10 @@ def _vowel_run(run: str) -> list[str]:
     return out
 
 
-def key(text: str) -> str:
-    """The matching key of a romanized spelling."""
+def key(text: str, final: bool = True) -> str:
+    """The matching key of a romanized spelling. With `final` false the text is taken
+    to continue (a syllable inside a word, or a word still being typed), so the rules
+    for the end of a word (dropping a last r, h or s) do not apply."""
     units = _UNITS.findall(fold(text))
     symbols: list[str] = []
     i = 0
@@ -87,10 +89,11 @@ def key(text: str) -> str:
     for i, symbol in enumerate(symbols):
         after_vowel = bool(out) and out[-1] in _VOWEL_KEYS
         next_is_vowel = i + 1 < len(symbols) and symbols[i + 1] in _VOWEL_KEYS
-        last = i == len(symbols) - 1
-        if symbol == "r" and after_vowel and not next_is_vowel:
+        word_end = final and i == len(symbols) - 1
+        text_end = i == len(symbols) - 1
+        if symbol == "r" and after_vowel and not next_is_vowel and (word_end or not text_end):
             continue  # orkun, khmer
-        if symbol in _FINAL_H and after_vowel and last:
+        if symbol in _FINAL_H and after_vowel and word_end:
             continue  # preah, pros
         if out and out[-1] == symbol:
             continue  # sabbay
