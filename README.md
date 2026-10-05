@@ -167,7 +167,7 @@ On the 126 phrases of `eval/testset.tsv`:
 | Top 1, phrases of several words | 88.3% | 95.7% |
 | Top 1, the same typed without spaces | 80.9% | 88.3% |
 | `suggest` per keystroke, 5-word input | median 0.2 ms, max 1.1 ms | median 0.6 ms, max 3.5 ms |
-| Engine start | 0.2 s | 5.6 s |
+| Engine start | 0.1 s | 4.1 s |
 
 The spec's target is under 10 ms per keystroke for a 5-word input. Most remaining errors
 need more context than one phrase gives (`lok` is លក់ "sell" or លោក "sir"), or are a choice
