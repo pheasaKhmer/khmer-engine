@@ -59,6 +59,16 @@ def test_a_picked_word_the_lexicon_lacks_is_offered():
     assert (first.text, first.source) == ("ដារ៉ារិទ្ធ", "learned")
 
 
+def test_a_picked_word_spelled_like_the_guess_is_still_learned():
+    engine = Engine()
+    guess = engine.transliterator.transliterate("dararith")
+    assert guess and guess not in engine.lexicon
+    engine.learn("dararith", guess, previous="ឈ្មោះ")
+    readings = [c for c in engine.choices("dararith") if c.text == guess]
+    assert [c.source for c in readings] == ["learned"]
+    assert engine.suggest("knhom chmous dararith")[0].text == guess
+
+
 def test_a_pick_counts_most_after_the_same_word():
     engine = Engine()
     for _ in range(3):

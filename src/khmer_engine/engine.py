@@ -106,10 +106,14 @@ class Engine:
 
     def _with_picks(self, typed: str, choices: list[Choice]) -> list[Choice]:
         """Offer every word picked for `typed` before, after any word. How much a pick
-        counts depends on the previous word, so the decoder adds that (`learned_bonus`)."""
-        offered = {c.text for c in choices}
+        counts depends on the previous word, so the decoder adds that (`learned_bonus`).
+
+        A picked word the lexicon lacks replaces any guess that spells it the same way:
+        the syllable-by-syllable guess for "dararith" can be the very name the user
+        picked, and as a guess it would keep the guess's low emission."""
         picked = {word for words in self.user.picks(typed).values() for word in words}
-        out = list(choices)
+        out = [c for c in choices if c.text not in picked or c.text in self.lexicon]
+        offered = {c.text for c in out}
         for word in sorted(picked - offered):
             emission = 0.0 if word in self.lexicon else LEARNED_UNKNOWN_BONUS
             out.append(Choice(word, emission, "learned", typed.lower()))
