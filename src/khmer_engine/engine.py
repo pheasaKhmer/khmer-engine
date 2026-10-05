@@ -8,7 +8,7 @@ from functools import cached_property
 from khmer_engine.decode import Choice, Conversion, Decoder, Settings
 from khmer_engine.english import read_english
 from khmer_engine.lexicon import Lexicon
-from khmer_engine.match import Matcher, Weights, read_chat_spellings
+from khmer_engine.match import Matcher, Weights, read_chat_spellings, read_preferred_spellings
 from khmer_engine.romanize import Romanizer, Style
 from khmer_engine.transliterate import Transliterator
 from khmer_engine.user import UserDictionary
@@ -44,8 +44,8 @@ class Engine:
     """Converts romanized Khmer to Khmer script.
 
     By default it uses the sample lexicon shipped with the package, the curated chat
-    spellings and the English word list. Pass `Lexicon.load("data/build")` for the full
-    lexicon.
+    spellings, the preferred spellings and the English word list. Pass
+    `Lexicon.load("data/build")` for the full lexicon.
     """
 
     def __init__(
@@ -53,6 +53,7 @@ class Engine:
         lexicon: Lexicon | None = None,
         *,
         chat_spellings: list[tuple[str, str]] | None = None,
+        preferred_spellings: dict[str, str] | None = None,
         english: frozenset[str] | None = None,
         weights: Weights | None = None,
         settings: Settings | None = None,
@@ -60,7 +61,9 @@ class Engine:
     ):
         self.lexicon = lexicon or Lexicon.sample()
         spellings = read_chat_spellings() if chat_spellings is None else chat_spellings
-        self.matcher = Matcher(self.lexicon, spellings, weights)
+        if preferred_spellings is None:
+            preferred_spellings = read_preferred_spellings()
+        self.matcher = Matcher(self.lexicon, spellings, weights, preferred_spellings)
         self.english = read_english() if english is None else english
         self.transliterator = Transliterator.from_lexicon(self.lexicon)
         self.user = user or UserDictionary()

@@ -5,13 +5,13 @@
 # without it, and words listed here are easy wins there.
 # spelling	khmer	reviewed
 sous dey	សួស្តី	no
-orkun	អរគុណ	no
-bong	បង	no
+orkun	អរគុណ	yes
+bong	បង	yes
 oun	អូន	no
-nham	ញ៉ាំ	no
-ot	អត់	no
-te	ទេ	no
-jg	ចង់	no
+nham	ញ៉ាំ	yes
+ot	អត់	yes
+te	ទេ	yes
+jg	ចង់	yes
 chong	ចង់	no
 hoy	ហើយ	no
 hery	ហើយ	no
@@ -20,12 +20,26 @@ chas	ចាស	no
 bat	បាទ	no
 oy	ឱ្យ	no
 aoy	ឱ្យ	no
-ey	អី	no
-avey	អ្វី	no
-nis	នេះ	no
+ey	អី	yes
+avey	អ្វី	yes
+nis	នេះ	yes
 nus	នោះ	no
 nhom	ខ្ញុំ	no
-kom	កុំ	no
+kom	កុំ	yes
 min	មិន	no
 pdey	ប្តី	no
 bros	ប្រុស	no
+nh	ខ្ញុំ	yes
+hz	ហើយ	yes
+sl	ស្រឡាញ់	yes
+o	អូន	yes
+b	បង	yes
+yy	និយាយ	yes
+tic	បន្តិច	yes
+jg	អញ្ចឹង	yes
+tv	ទៅ	yes
+coffee	កាហ្វេ	yes
+khg	ខឹង	yes
+mor	មក	yes
+tgnai	ថ្ងៃ	yes
+tae	តែ	yes

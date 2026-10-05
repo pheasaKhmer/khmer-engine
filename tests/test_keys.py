@@ -1,6 +1,6 @@
 import pytest
 
-from khmer_engine.keys import fold, key
+from khmer_engine.keys import consonants, fold, key, without_first_vowel
 
 
 def test_fold_keeps_lowercase_ascii_letters():
@@ -21,7 +21,9 @@ def test_fold_keeps_lowercase_ascii_letters():
         # Others that are common in chat.
         ["sous dey", "suosdey", "sousdey", "sursdey", "suos'dei"],
         ["orkun", "okun", "or kun", "orkoun"],
-        ["sabay", "sabai"],
+        ["sabay", "sabai", "sabaii"],
+        ["tgnai", "tgnaii"],  # a vowel letter typed twice
+        ["sok", "sook"],
         ["pros", "proh"],
         ["mean", "mian", "mien"],
         ["nham", "nyam"],
@@ -64,3 +66,27 @@ def test_text_that_continues_keeps_its_last_r_h_and_s():
     assert key("dar") == "dA"
     assert key("dar", final=False) == "dAr"
     assert key("preah", final=False) == "prJh"
+
+
+@pytest.mark.parametrize(
+    ("spelling", "expected"),
+    [("tov", "tv"), ("deng", "dg"), ("chong", "chg"), ("kheng", "khg"), ("te", None), ("", None)],
+)
+def test_consonants_abbreviate_a_spelling(spelling, expected):
+    assert consonants(spelling) == expected
+
+
+@pytest.mark.parametrize(
+    ("spelling", "nasal", "expected"),
+    [
+        ("sabay", False, "sbay"),
+        ("rovol", False, "rvol"),
+        ("tomne", True, "tne"),
+        ("tomne", False, None),  # a closed first syllable keeps its vowel
+        ("somtos", False, None),
+        ("orkun", False, None),  # no consonant before the vowel
+        ("tov", False, None),  # one syllable
+    ],
+)
+def test_without_first_vowel(spelling, nasal, expected):
+    assert without_first_vowel(spelling, nasal) == expected

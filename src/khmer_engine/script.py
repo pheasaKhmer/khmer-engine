@@ -21,6 +21,7 @@ KAKABAT = "\u17ce"  # ៎
 AHSDA = "\u17cf"  # ៏
 SAMYOK_SANNYA = "\u17d0"  # ័
 VIRIAM = "\u17d1"  # ៑
+LEK_TOO = "\u17d7"  # ៗ repeats the word before it
 ZWNJ = "\u200c"
 ZWJ = "\u200d"
 ZWSP = "\u200b"

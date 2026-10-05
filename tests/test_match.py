@@ -2,7 +2,13 @@ import pytest
 from pheasa import normalize
 
 from khmer_engine.lexicon import Lexicon
-from khmer_engine.match import Matcher, Weights, forms, read_chat_spellings
+from khmer_engine.match import (
+    Matcher,
+    Weights,
+    forms,
+    read_chat_spellings,
+    read_preferred_spellings,
+)
 
 
 @pytest.fixture(scope="module")
@@ -13,6 +19,23 @@ def matcher():
 def test_words_are_indexed_under_each_romanization():
     by_source = {f.source: f.spelling for f in forms("ខ្មែរ", ["k m ae"])}
     assert by_source == {"pronunciation": "kmae", "spelling": "khmaer", "ungegn": "khmer"}
+
+
+def test_common_words_are_indexed_by_their_consonants_too():
+    by_source = {f.source: f.spelling for f in forms("ទៅ", ["t ɨ w"], abbreviated=True)}
+    assert by_source["consonants"] == "tv"
+    assert "consonants" not in {f.source for f in forms("ទៅ", ["t ɨ w"])}
+
+
+@pytest.mark.parametrize(("word", "expected"), [("សប្បាយ", "sbay"), ("ទំនេរ", "tne")])
+def test_an_unstressed_first_syllable_is_indexed_without_its_vowel(word, expected):
+    lexicon = Lexicon.sample()
+    found = forms(word, lexicon.entries[word].pronunciations)
+    assert expected in {f.spelling for f in found if f.source == "minor"}
+
+
+def test_a_written_first_vowel_is_kept():
+    assert "minor" not in {f.source for f in forms("សាលា", ["s a . l a"])}
 
 
 def test_duplicate_romanizations_are_indexed_once():
@@ -63,6 +86,21 @@ def test_curated_spellings(matcher):
     assert (best.text, best.source) == ("ចង់", "curated")
 
 
+@pytest.mark.parametrize(("typed", "expected"), [("tv", "ទៅ"), ("nv", "នៅ"), ("dg", "ដឹង")])
+def test_consonants_find_a_common_word(matcher, typed, expected):
+    best = matcher.lookup(typed)[0]
+    assert (best.text, best.source) == (expected, "consonants")
+
+
+def test_a_left_out_first_vowel_is_found(matcher):
+    best = matcher.lookup("sbay")[0]
+    assert (best.text, best.source) == ("សប្បាយ", "minor")
+
+
+def test_typing_the_vowels_too_matches_better(matcher):
+    assert matcher.lookup("tov")[0].score > matcher.lookup("tv")[0].score
+
+
 def test_candidates_are_ranked_and_limited(matcher):
     candidates = matcher.lookup("bong", n=3)
     assert len(candidates) == 3
@@ -102,3 +140,18 @@ def test_completions_need_two_key_symbols(matcher):
 
 def test_completions_leave_out_exact_matches(matcher):
     assert "អរគុណ" not in matcher.completions("orkun")
+
+
+def test_a_variant_spelling_is_not_offered():
+    lexicon = Lexicon.sample()
+    both = [c.text for c in Matcher(lexicon).lookup("srolanh")]
+    assert {"ស្រឡាញ់", "ស្រលាញ់"} <= set(both)
+    preferred = Matcher(lexicon, preferred={"ស្រលាញ់": "ស្រឡាញ់"})
+    assert "ស្រលាញ់" not in [c.text for c in preferred.lookup("srolanh")]
+
+
+def test_packaged_preferred_spellings_point_at_sample_words():
+    preferred = read_preferred_spellings()
+    assert preferred["ស្រលាញ់"] == "ស្រឡាញ់"
+    lexicon = Lexicon.sample()
+    assert all(word in lexicon for pair in preferred.items() for word in pair)

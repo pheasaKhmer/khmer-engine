@@ -19,6 +19,7 @@ from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 
 from khmer_engine.lexicon import Lexicon
+from khmer_engine.script import LEK_TOO
 
 # Latin letters, including the diacritics of UNGEGN romanization, and apostrophes.
 _LATIN = "A-Za-z\u00c0-\u024f'\u2019"
@@ -155,10 +156,16 @@ def _segments(text: str) -> Iterator[str | _Phrase]:
 
 
 def join(choices: list[Choice]) -> str:
-    """Khmer words are written together; English words get a space on each side."""
+    """Khmer words are written together; English words get a space on each side. A Khmer
+    word typed twice in a row is written once with ៗ, as Khmer writes repetition."""
     out = ""
     for i, choice in enumerate(choices):
-        if i and (not choice.is_khmer or not choices[i - 1].is_khmer):
+        previous = choices[i - 1] if i else None
+        if previous and choice.is_khmer and previous.is_khmer and choice.text == previous.text:
+            if not out.endswith(LEK_TOO):
+                out += LEK_TOO
+            continue
+        if previous and (not choice.is_khmer or not previous.is_khmer):
             out += " "
         out += choice.text
     return out

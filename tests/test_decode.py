@@ -27,6 +27,14 @@ def test_join_writes_khmer_together_and_english_apart():
     assert join(choices) == "អត់មាន wifi ទេ"
 
 
+def test_join_writes_a_repeated_word_with_lek_too():
+    ban, haey = Choice("បាន", 0, "curated"), Choice("ហើយ", 0, "curated")
+    assert join([ban, haey, haey]) == "បានហើយៗ"
+    assert join([haey, haey, haey]) == "ហើយៗ"
+    ok = Choice("ok", 0, "english")
+    assert join([ok, ok]) == "ok ok"
+
+
 @pytest.fixture
 def decoder():
     lexicon = Lexicon(

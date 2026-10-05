@@ -11,7 +11,7 @@ it was typed. The variants folded are:
 - a final i after another vowel, which is the glide y: "sabai" is "sabay"
 - r after a vowel, which chat uses to lengthen it: "orkun", "khmer"
 - h or s at the end of a word, which are both pronounced h: "preah", "pros"
-- doubled letters: "sabbay"
+- doubled letters: "sabbay", and a vowel letter typed twice: "tgnaii" is "tgnai"
 - diacritics and apostrophes, so UNGEGN spellings match too: "Kâmpŭchéa", "l'â"
 
 Keys are lowercase consonants and uppercase vowel groups. They are only for lookup;
@@ -35,13 +35,13 @@ CONSONANTS = {
 # Vowel spellings grouped by how chat uses them. A run of vowel letters that is not
 # listed is keyed letter by letter.
 VOWELS = {
-    "a": "A", "aa": "A",
+    "a": "A",
     # Back vowels, and ោ/ៅ, which chat writes as o as often as ao: កោះកុង "Koh Kong".
-    "o": "O", "oo": "O", "ou": "O", "u": "O", "uu": "O", "uo": "O", "ua": "O", "uoa": "O",
+    "o": "O", "ou": "O", "u": "O", "uo": "O", "ua": "O", "uoa": "O",
     "ao": "O", "au": "O",
     # Front and central vowels. Chat writes ɨ and ə as e, eu or i: ដឹង "deng",
     # មិន "min" or "men", ពិត "pit".
-    "e": "E", "ee": "E", "ae": "E", "eae": "E", "i": "E", "ii": "E",
+    "e": "E", "ae": "E", "eae": "E", "i": "E",
     "eu": "E", "oe": "E", "ue": "E", "oeu": "E", "ueu": "E", "aeu": "E", "oea": "E",
     "ea": "J", "ia": "J", "ie": "J", "iea": "J", "eia": "J",
     "oa": "Q",
@@ -59,13 +59,46 @@ def fold(text: str) -> str:
 
 
 def _vowel_run(run: str) -> list[str]:
-    glide = len(run) > 1 and run.endswith("i") and not run.endswith("ii")
+    # A letter typed twice counts once: "aii" is "ai".
+    run = "".join(ch for i, ch in enumerate(run) if i == 0 or ch != run[i - 1])
+    glide = len(run) > 1 and run.endswith("i")
     if glide:
         run = run[:-1]
     out = [VOWELS[run]] if run in VOWELS else [VOWELS[ch] for ch in run]
     if glide:
         out.append("y")
     return out
+
+
+def consonants(spelling: str) -> str | None:
+    """The consonant letters of a romanization, the way chat abbreviates a common word:
+    "tov" is "tv" and "deng" is "dg", since chat writes ng as g at the end of an
+    abbreviation. None if fewer than two consonants are left, as a single letter could
+    stand for too many words."""
+    units = [unit for unit in _UNITS.findall(fold(spelling)) if unit not in _VOWEL_LETTERS]
+    if len(units) < 2:
+        return None
+    return "".join("g" if unit == "ng" else unit for unit in units)
+
+
+def without_first_vowel(spelling: str, nasal: bool = False) -> str | None:
+    """A romanization with the vowel of its first syllable left out, as chat types the
+    unstressed first syllable of a word like សប្បាយ ("sbay") or រវល់ ("rvol"). Only an
+    open first syllable loses its vowel: "sabay" but not "somtos". With `nasal`, the
+    syllable is written with ំ and its m goes too: ទំនេរ "tomne" is "tne"."""
+    units = _UNITS.findall(fold(spelling))
+    if len(units) < 4 or units[0] in _VOWEL_LETTERS:
+        return None
+    j = 1
+    while j < len(units) and units[j] in _VOWEL_LETTERS:
+        j += 1
+    if j == 1:
+        return None
+    end = j + 1 if nasal and j < len(units) and units[j] == "m" else j
+    rest = units[end:]
+    if len(rest) < 2 or rest[0] in _VOWEL_LETTERS or rest[1] not in _VOWEL_LETTERS:
+        return None
+    return units[0] + "".join(rest)
 
 
 def key(text: str, final: bool = True) -> str:
