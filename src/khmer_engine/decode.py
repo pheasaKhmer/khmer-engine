@@ -170,7 +170,8 @@ class Decoder:
         self.choices = choices
         self.settings = settings or Settings()
 
-    def _language_model(self, previous: str | None, choice: Choice) -> float:
+    def language_model(self, previous: str | None, choice: Choice) -> float:
+        """Weighted log probability of `choice` after the Khmer word `previous`."""
         if not choice.is_khmer:
             return -self.settings.english
         if previous is None:
@@ -183,7 +184,7 @@ class Decoder:
         """The span's best choices without context, so the search only weighs those."""
         ranked = sorted(
             self.choices(typed, whole),
-            key=lambda c: -(c.emission + self._language_model(None, c)),
+            key=lambda c: -(c.emission + self.language_model(None, c)),
         )
         return ranked[: self.settings.choices_per_span]
 
@@ -224,7 +225,7 @@ class Decoder:
                 for hypothesis in beams.get(position, ()):
                     for choice in choices:
                         score = hypothesis.score + choice.emission - cost
-                        score += self._language_model(hypothesis.previous, choice)
+                        score += self.language_model(hypothesis.previous, choice)
                         previous = choice.text if choice.is_khmer else None
                         new = _Hypothesis(score, previous, hypothesis, (position, end), choice)
                         self._add(beams, end, new)
@@ -250,7 +251,7 @@ class Decoder:
             assert step.choice is not None
             others = sorted(
                 (c for c in spans[start, end][0] if c != step.choice),
-                key=lambda c: -(c.emission + self._language_model(previous, c)),
+                key=lambda c: -(c.emission + self.language_model(previous, c)),
             )
             first, last = phrase.characters(start, end)
             choices = [step.choice, *others][:n]

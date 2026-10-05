@@ -93,3 +93,30 @@ def test_unknown_words_are_transliterated(engine):
 
 def test_words_nothing_can_read_are_kept(engine):
     assert engine.convert("xyzq bong") == "xyzq បង"
+
+
+def test_suggest_completes_the_word_being_typed(engine):
+    (first, *_) = engine.suggest("orku")
+    assert (first.text, first.source, first.start, first.end) == ("អរគុណ", "completion", 0, 4)
+
+
+def test_suggest_gives_the_span_to_replace(engine):
+    (first, *_) = engine.suggest("sok saba")
+    assert (first.text, first.start, first.end) == ("សុខសប្បាយ", 0, 8)
+
+
+def test_suggest_ranks_readings_of_the_last_word_in_context(engine):
+    suggestions = engine.suggest("sok sabay te", n=3)
+    assert suggestions[0].text == "ទេ"
+    assert len(suggestions) == 3
+    assert all((s.start, s.end) == (10, 12) for s in suggestions)
+    assert [s.score for s in suggestions] == sorted((s.score for s in suggestions), reverse=True)
+
+
+def test_a_finished_word_is_not_completed(engine):
+    assert all(s.source != "completion" for s in engine.suggest("hello?"))
+
+
+def test_suggest_without_latin_words(engine):
+    assert engine.suggest("") == []
+    assert engine.suggest("123 ?") == []

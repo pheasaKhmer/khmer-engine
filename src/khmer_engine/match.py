@@ -13,6 +13,7 @@ likely the typed spelling is for that word, from two penalties: whether the key 
 be edited, and how far the typed letters are from the closest romanization of the word.
 """
 
+from bisect import bisect_left
 from collections.abc import Iterable
 from dataclasses import dataclass
 from importlib.resources import files
@@ -27,6 +28,8 @@ from khmer_engine.phonemes import to_chat
 from khmer_engine.rules import romanize_word
 
 MIN_FUZZY_KEY = 3  # shorter keys have too many neighbours to edit
+MIN_COMPLETION_KEY = 2  # shorter prefixes start too many words to be useful
+MAX_COMPLETION_SCAN = 5000  # keys looked at per completion lookup
 
 
 @dataclass(frozen=True)
@@ -37,6 +40,8 @@ class Weights:
     spelling: float = 5.0  # times the normalized letter distance to the closest romanization
     curated: float = 1.5  # bonus when a hand-written chat spelling matched
     frequency: float = 0.5  # weight of the word's log probability in `lookup`
+    completion: float = 2.0  # the word is longer than what was typed so far
+    missing: float = 0.5  # per key symbol not typed yet
 
 
 @dataclass(frozen=True)
@@ -92,6 +97,7 @@ class Matcher:
         for spelling, word in curated:
             self._add(Form(normalize(word), fold(spelling), "curated"))
         self.alphabet = sorted({symbol for k in self.index for symbol in k})
+        self.sorted_keys = sorted(self.index)
 
     def _add(self, form: Form) -> None:
         self.index.setdefault(key(form.spelling), []).append(form)
@@ -119,6 +125,30 @@ class Matcher:
             if form.word not in best or score > best[form.word][0]:
                 best[form.word] = (score, form)
         return best
+
+    def completions(self, text: str, limit: int = 20) -> dict[str, tuple[float, Form]]:
+        """Words whose key starts with the key of `text` and is longer: readings of a word
+        still being typed. Exact keys are left to `emissions`. Keeps the `limit` words
+        with the best emission and frequency."""
+        prefix = key(text, final=False)
+        if len(prefix) < MIN_COMPLETION_KEY:
+            return {}
+        found: dict[str, tuple[float, Form]] = {}
+        start = bisect_left(self.sorted_keys, prefix)
+        for other in self.sorted_keys[start : start + MAX_COMPLETION_SCAN]:
+            if not other.startswith(prefix):
+                break
+            if other == prefix:
+                continue
+            score = -self.weights.completion - self.weights.missing * (len(other) - len(prefix))
+            for form in self.index[other]:
+                if form.word not in found or score > found[form.word][0]:
+                    found[form.word] = (score, form)
+        ranked = sorted(
+            found.items(),
+            key=lambda item: -(item[1][0] + self.weights.frequency * self.lexicon.logprob(item[0])),
+        )
+        return dict(ranked[:limit])
 
     def lookup(self, text: str, n: int = 5) -> list[Candidate]:
         """The `n` most likely Khmer words for one romanized word, with no context."""

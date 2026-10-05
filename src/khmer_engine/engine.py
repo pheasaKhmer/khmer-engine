@@ -1,5 +1,7 @@
 """The conversion engine: lexicon, matcher and decoder together."""
 
+from dataclasses import dataclass
+
 from khmer_engine.decode import Choice, Conversion, Decoder, Settings
 from khmer_engine.english import read_english
 from khmer_engine.lexicon import Lexicon
@@ -11,6 +13,18 @@ from khmer_engine.transliterate import Transliterator
 FALLBACK_EMISSION = -8.0
 # Emission of keeping a typed word as it is, when nothing else reads it.
 TYPED_EMISSION = -20.0
+
+
+@dataclass(frozen=True)
+class Suggestion:
+    """A reading for the word being typed. Replacing `text[start:end]` of the input with
+    `text` commits it. Higher scores are better."""
+
+    text: str
+    score: float
+    start: int
+    end: int
+    source: str
 
 
 class Engine:
@@ -53,6 +67,29 @@ class Engine:
                 out.append(Choice(guess, FALLBACK_EMISSION, "fallback", typed.lower()))
             out.append(Choice(typed, TYPED_EMISSION, "typed", typed))
         return out
+
+    def suggest(self, text: str, n: int = 5) -> list[Suggestion]:
+        """Ranked readings of the last word of `text`, in the context of the words before
+        it. While the last word is still being typed (no space or punctuation after it),
+        words it could be the start of are suggested too."""
+        tokens = self.decoder.convert(text, n).tokens
+        if not tokens:
+            return []
+        last = tokens[-1]
+        before = tokens[-2].choices[0] if len(tokens) > 1 else None
+        previous = before.text if before and before.is_khmer else None
+        candidates = list(last.choices)
+        if last.end == len(text):
+            for word, (emission, form) in self.matcher.completions(last.typed).items():
+                candidates.append(Choice(word, emission, "completion", form.spelling))
+        best: dict[str, Suggestion] = {}
+        for choice in candidates:
+            score = choice.emission + self.decoder.language_model(previous, choice)
+            if choice.text not in best or score > best[choice.text].score:
+                best[choice.text] = Suggestion(
+                    choice.text, score, last.start, last.end, choice.source
+                )
+        return sorted(best.values(), key=lambda s: -s.score)[:n]
 
     def analyze(self, text: str, n: int = 5) -> Conversion:
         """The best conversion, the n best alternatives, and ranked choices per span."""
