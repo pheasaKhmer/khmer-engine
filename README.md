@@ -199,7 +199,7 @@ is rare.
 These need a native speaker. Each data file has a `reviewed` column to fill in.
 
 - `eval/testset.tsv`: all 126 phrases and their Khmer
-- `src/khmer_engine/data/chat_spellings.tsv`: 15 of the 38 curated chat spellings
+- `src/khmer_engine/data/chat_spellings.tsv`: 15 of the 39 curated chat spellings
 - Choices in `phonemes.py` about how sounds are typed: short ɨ as `e` (`penh`, `nek`),
   long ɑ without a final as `or` (`orkun`, `lor`), ទៅ as `tov`
 - The examples marked † in this README
