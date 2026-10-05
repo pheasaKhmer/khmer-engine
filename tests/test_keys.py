@@ -1,6 +1,6 @@
 import pytest
 
-from khmer_engine.keys import consonants, fold, key
+from khmer_engine.keys import consonants, fold, key, without_first_vowel
 
 
 def test_fold_keeps_lowercase_ascii_letters():
@@ -72,3 +72,19 @@ def test_text_that_continues_keeps_its_last_r_h_and_s():
 )
 def test_consonants_abbreviate_a_spelling(spelling, expected):
     assert consonants(spelling) == expected
+
+
+@pytest.mark.parametrize(
+    ("spelling", "nasal", "expected"),
+    [
+        ("sabay", False, "sbay"),
+        ("rovol", False, "rvol"),
+        ("tomne", True, "tne"),
+        ("tomne", False, None),  # a closed first syllable keeps its vowel
+        ("somtos", False, None),
+        ("orkun", False, None),  # no consonant before the vowel
+        ("tov", False, None),  # one syllable
+    ],
+)
+def test_without_first_vowel(spelling, nasal, expected):
+    assert without_first_vowel(spelling, nasal) == expected

@@ -21,6 +21,17 @@ def test_common_words_are_indexed_by_their_consonants_too():
     assert "consonants" not in {f.source for f in forms("ទៅ", ["t ɨ w"])}
 
 
+@pytest.mark.parametrize(("word", "expected"), [("សប្បាយ", "sbay"), ("ទំនេរ", "tne")])
+def test_an_unstressed_first_syllable_is_indexed_without_its_vowel(word, expected):
+    lexicon = Lexicon.sample()
+    found = forms(word, lexicon.entries[word].pronunciations)
+    assert expected in {f.spelling for f in found if f.source == "minor"}
+
+
+def test_a_written_first_vowel_is_kept():
+    assert "minor" not in {f.source for f in forms("សាលា", ["s a . l a"])}
+
+
 def test_duplicate_romanizations_are_indexed_once():
     spellings = [f.spelling for f in forms("ទៅ", ["t ɨ w"])]
     assert len(spellings) == len(set(spellings))
@@ -73,6 +84,11 @@ def test_curated_spellings(matcher):
 def test_consonants_find_a_common_word(matcher, typed, expected):
     best = matcher.lookup(typed)[0]
     assert (best.text, best.source) == (expected, "consonants")
+
+
+def test_a_left_out_first_vowel_is_found(matcher):
+    best = matcher.lookup("sbay")[0]
+    assert (best.text, best.source) == ("សប្បាយ", "minor")
 
 
 def test_typing_the_vowels_too_matches_better(matcher):

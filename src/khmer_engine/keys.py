@@ -79,6 +79,26 @@ def consonants(spelling: str) -> str | None:
     return "".join("g" if unit == "ng" else unit for unit in units)
 
 
+def without_first_vowel(spelling: str, nasal: bool = False) -> str | None:
+    """A romanization with the vowel of its first syllable left out, as chat types the
+    unstressed first syllable of a word like សប្បាយ ("sbay") or រវល់ ("rvol"). Only an
+    open first syllable loses its vowel: "sabay" but not "somtos". With `nasal`, the
+    syllable is written with ំ and its m goes too: ទំនេរ "tomne" is "tne"."""
+    units = _UNITS.findall(fold(spelling))
+    if len(units) < 4 or units[0] in _VOWEL_LETTERS:
+        return None
+    j = 1
+    while j < len(units) and units[j] in _VOWEL_LETTERS:
+        j += 1
+    if j == 1:
+        return None
+    end = j + 1 if nasal and j < len(units) and units[j] == "m" else j
+    rest = units[end:]
+    if len(rest) < 2 or rest[0] in _VOWEL_LETTERS or rest[1] not in _VOWEL_LETTERS:
+        return None
+    return units[0] + "".join(rest)
+
+
 def key(text: str, final: bool = True) -> str:
     """The matching key of a romanized spelling. With `final` false the text is taken
     to continue (a syllable inside a word, or a word still being typed), so the rules
