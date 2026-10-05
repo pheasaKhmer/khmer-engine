@@ -15,7 +15,7 @@ Examples marked † are ones a native speaker should double-check (see
 
 ```bash
 uv sync
-uv run khmer-engine convert "nham bai hoy nov"    # ញ៉ាំបាយហើយនៅ †
+uv run khmer-engine convert "nham bai hz nv"      # ញ៉ាំបាយហើយនៅ
 uv run khmer-engine suggest "orku"                # 1. អរគុណ ... (completes the word being typed)
 uv run khmer-engine romanize "ខ្ញុំស្រឡាញ់អូន។"       # khnhom srolanh oun. †
 uv run khmer-engine romanize --style ungegn "ភ្នំពេញ" # phnumpénh
@@ -68,8 +68,18 @@ words appears in 6.5 million words of Khmer web text.
 | spelling | rule-based chat style (the Geographic Department system) | `arkun` | `phnumpenh` |
 | ungegn | the UNGEGN standard, diacritics removed | `arkun` | `phnumpenh` |
 | curated | a short hand-written list (`data/chat_spellings.tsv`) | `orkun` | |
+| consonants | the consonants of the chat spellings, for the 5,000 most common words | `rkn` | `pnmpnh` |
+| minor | the chat spellings without the vowel of an unstressed first syllable | | |
 
-The curated list is for spellings nothing predicts, such as abbreviations: `jg` for ចង់.
+The curated list is for spellings nothing predicts, such as abbreviations: `nh` for ខ្ញុំ,
+`hz` for ហើយ. Chat abbreviates other common words to their consonants, which the
+consonants forms find: `tv` for ទៅ, `dg` for ដឹង (ng is written g). A first syllable written
+without a vowel sign is often typed without its vowel too, which the minor forms find:
+`sbay` for សប្បាយ, `tne` for ទំនេរ. Both cost a little, so spelling the vowels out still
+matches better.
+
+Of two spellings in common use, conversion writes the one in
+`data/preferred_spellings.tsv`: ស្រឡាញ់, not ស្រលាញ់.
 
 **3. Matching keys.** A key folds the spelling variants of chat romanization so they
 coincide:
@@ -92,12 +102,13 @@ candidate scores and bigram probabilities, so context decides between words that
 alike:
 
 ```
-bong srolanh oun  →  បងស្រលាញ់អូន  (បង, "older sibling")  †
+bong srolanh oun  →  បងស្រឡាញ់អូន  (បង, "older sibling")
 bong luy          →  បង់លុយ        (បង់, "to pay")       †
 ```
 
 A word may be typed across spaces (`or kun` → អរគុណ), several words without spaces
 (`soksabayte` → សុខសប្បាយទេ), and English mixed in (`ot mean wifi te` → អត់មាន wifi ទេ).
+A word typed twice in a row is written once with ៗ (`ban hz hz` → បានហើយៗ).
 English words on a list stay as typed, at a cost, so a good Khmer reading still wins.
 A word nothing reads is spelled syllable by syllable from a table learned from the lexicon
 (`knhom chmous sreymom` → ខ្ញុំឈ្មោះស្រីមុំ †), or kept as typed.
@@ -158,32 +169,43 @@ make eval                                            # bundled sample
 uv run python eval/evaluate.py --data data/build --failures
 ```
 
-On the 126 phrases of `eval/testset.tsv`:
+There are two test sets. `eval/testset.tsv` has 126 phrases whose romanized side was
+written along with the engine. `eval/native.tsv` has 65 phrases a native speaker typed the
+way they chat, when shown the Khmer; it is the harder and more honest one.
 
-| | Sample (3,008 words) | Full (61,980 words) |
+| | Sample (3,009 words) | Full (61,980 words) |
 |---|---|---|
-| Top 1, all phrases | 86.5% | 92.1% |
-| Top 5, all phrases | 96.0% | 96.8% |
-| Top 1, phrases of several words | 88.3% | 95.7% |
-| Top 1, the same typed without spaces | 80.9% | 88.3% |
-| `suggest` per keystroke, 5-word input | median 0.2 ms, max 1.1 ms | median 0.6 ms, max 3.5 ms |
-| Engine start | 0.1 s | 4.1 s |
+| Test set, top 1 | 88.1% | 93.7% |
+| Test set, top 5 | 97.6% | 98.4% |
+| Test set, phrases of several words typed without spaces, top 1 | 83.0% | 90.4% |
+| Native speaker set, top 1 | 72.3% | 75.4% |
+| Native speaker set, top 5 | 81.5% | 83.1% |
+| `suggest` per keystroke, 5-word input | median 0.3 ms, max 1.2 ms | median 0.8 ms, max 4.1 ms |
+| Engine start | 0.1 s | 4.2 s |
+
+Before the native speaker set existed, the engine got 43% of it right: it did not know
+abbreviations (`nh`, `tv`, `hz`), dropped vowels (`sbay`) or ៗ. Some curated spellings
+come from that set, so its score is optimistic for those words; a new batch of typing
+measures it fairly. `make eval` fails if either set drops below its threshold on the sample.
 
 The spec's target is under 10 ms per keystroke for a 5-word input. Most remaining errors
-need more context than one phrase gives (`lok` is លក់ "sell" or លោក "sir"), or are a choice
-between two spellings in common use (ស្រឡាញ់ and ស្រលាញ់). The test set has not been reviewed
-by a native speaker yet, so treat these numbers as provisional.
+need more context than one phrase gives (`luk` is លក់ "sell" or លោក "sir", `pi` is ពី
+"from" or ពីរ "two"), or are spellings the engine reads another way: `sok sbay` as
+សោកស្តាយ, because the lexicon counts សុខសប្បាយ as one word and the pair of its halves
+is rare.
 
 ## Checking the Khmer
 
 These need a native speaker. Each data file has a `reviewed` column to fill in.
 
 - `eval/testset.tsv`: all 126 phrases and their Khmer
-- `src/khmer_engine/data/chat_spellings.tsv`: the 25 curated chat spellings
+- `src/khmer_engine/data/chat_spellings.tsv`: 15 of the 35 curated chat spellings
 - Choices in `phonemes.py` about how sounds are typed: short ɨ as `e` (`penh`, `nek`),
   long ɑ without a final as `or` (`orkun`, `lor`), ទៅ as `tov`
-- Which spelling to prefer when two are common: ស្រឡាញ់ (dictionary) or ស្រលាញ់ (output now)
 - The examples marked † in this README
+
+`eval/native.tsv` was typed by a native speaker; more batches like it are the best way to
+improve the engine.
 
 ## Porting to C++ or Rust
 
