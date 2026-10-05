@@ -21,7 +21,9 @@ def test_fold_keeps_lowercase_ascii_letters():
         # Others that are common in chat.
         ["sous dey", "suosdey", "sousdey", "sursdey", "suos'dei"],
         ["orkun", "okun", "or kun", "orkoun"],
-        ["sabay", "sabai"],
+        ["sabay", "sabai", "sabaii"],
+        ["tgnai", "tgnaii"],  # a vowel letter typed twice
+        ["sok", "sook"],
         ["pros", "proh"],
         ["mean", "mian", "mien"],
         ["nham", "nyam"],
