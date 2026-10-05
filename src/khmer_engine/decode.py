@@ -27,8 +27,8 @@ _TOKENS = re.compile(rf"(?P<word>[{_LATIN}]+)|(?P<space>[^\S\n]+)|(?P<other>.)",
 
 @dataclass(frozen=True)
 class Choice:
-    """One reading of a span of typed text. Khmer choices are lexicon words unless
-    `source` says otherwise; "english" choices keep the typed text."""
+    """One reading of a span of typed text. "english" and "typed" choices keep the
+    typed text; every other source is Khmer."""
 
     text: str
     emission: float
@@ -37,7 +37,7 @@ class Choice:
 
     @property
     def is_khmer(self) -> bool:
-        return self.source != "english"
+        return self.source not in ("english", "typed")
 
 
 @dataclass(frozen=True)
@@ -72,8 +72,9 @@ class Settings:
     beam: int = 8
 
 
-# Called with the typed text of a span, and whether the span is made of whole typed
-# words (True) or is a piece of one (False); pieces should only match exactly.
+# Called with the typed text of a span (several typed words keep their spaces), and
+# whether the span is made of whole typed words (True) or is a piece of one (False);
+# pieces should only match exactly.
 ChoiceSource = Callable[[str, bool], list[Choice]]
 
 
@@ -194,7 +195,7 @@ class Decoder:
         out = {}
         for i in range(n):
             for j in range(i + 1, min(i + settings.max_words_per_span, n) + 1):
-                typed = "".join(w[0] for w in phrase.words[i:j])
+                typed = " ".join(w[0] for w in phrase.words[i:j])
                 out[offsets[i], offsets[j]] = (
                     self._ranked(typed, True),
                     settings.join * (j - i - 1),

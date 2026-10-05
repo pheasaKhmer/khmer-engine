@@ -83,3 +83,13 @@ def test_split_tokens_point_inside_the_typed_word(engine):
         ("orkun", 3, 8),
         ("bong", 8, 12),
     ]
+
+
+def test_unknown_words_are_transliterated(engine):
+    result = engine.analyze("knhom chmous sreymom")
+    assert result.text == "ខ្ញុំឈ្មោះស្រីមុំ"
+    assert result.tokens[-1].choices[0].source == "fallback"
+
+
+def test_words_nothing_can_read_are_kept(engine):
+    assert engine.convert("xyzq bong") == "xyzq បង"
