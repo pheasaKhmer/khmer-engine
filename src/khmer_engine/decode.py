@@ -78,6 +78,14 @@ class Settings:
 # pieces should only match exactly.
 ChoiceSource = Callable[[str, bool], list[Choice]]
 
+# Called with the previous Khmer word (None at the start), the typed text of a span and a
+# choice for it: a bonus for what the user picked before. Zero for nothing picked.
+LearnedBonus = Callable[[str | None, str, Choice], float]
+
+
+def _nothing_learned(previous: str | None, typed: str, choice: Choice) -> float:
+    return 0.0
+
 
 @dataclass
 class _Hypothesis:
@@ -172,10 +180,17 @@ def join(choices: list[Choice]) -> str:
 
 
 class Decoder:
-    def __init__(self, lexicon: Lexicon, choices: ChoiceSource, settings: Settings | None = None):
+    def __init__(
+        self,
+        lexicon: Lexicon,
+        choices: ChoiceSource,
+        settings: Settings | None = None,
+        learned: LearnedBonus = _nothing_learned,
+    ):
         self.lexicon = lexicon
         self.choices = choices
         self.settings = settings or Settings()
+        self.learned = learned
 
     def language_model(self, previous: str | None, choice: Choice) -> float:
         """Weighted log probability of `choice` after the Khmer word `previous`."""
@@ -187,13 +202,20 @@ class Decoder:
             score = self.lexicon.bigram_logprob(previous, choice.text)
         return self.settings.language_model * score
 
+    def context(self, previous: str | None, typed: str, choice: Choice) -> float:
+        """The score of `choice` for `typed` that depends on the word before it: the
+        language model, and what the user picked before after that word."""
+        return self.language_model(previous, choice) + self.learned(previous, typed, choice)
+
     def _ranked(self, typed: str, whole: bool) -> list[Choice]:
-        """The span's best choices without context, so the search only weighs those."""
+        """The span's best choices without context, so the search only weighs those. Words
+        the user picked for this text are kept too: after the right word they may win."""
         ranked = sorted(
             self.choices(typed, whole),
             key=lambda c: -(c.emission + self.language_model(None, c)),
         )
-        return ranked[: self.settings.choices_per_span]
+        cut = self.settings.choices_per_span
+        return ranked[:cut] + [c for c in ranked[cut:] if self.learned(None, typed, c) > 0]
 
     def _spans(self, phrase: _Phrase) -> dict[tuple[int, int], tuple[list[Choice], float]]:
         """Every span with its choices and its cost."""
@@ -229,10 +251,11 @@ class Decoder:
         beams: dict[int, list[_Hypothesis]] = {0: [_Hypothesis(0.0, None)]}
         for position in range(length):
             for end, choices, cost in starting.get(position, ()):
+                typed = phrase.typed(position, end)
                 for hypothesis in beams.get(position, ()):
                     for choice in choices:
                         score = hypothesis.score + choice.emission - cost
-                        score += self.language_model(hypothesis.previous, choice)
+                        score += self.context(hypothesis.previous, typed, choice)
                         previous = choice.text if choice.is_khmer else None
                         new = _Hypothesis(score, previous, hypothesis, (position, end), choice)
                         self._add(beams, end, new)
@@ -256,13 +279,14 @@ class Decoder:
         for step in best.path():
             start, end = step.span
             assert step.choice is not None
+            typed = phrase.typed(start, end)
             others = sorted(
                 (c for c in spans[start, end][0] if c != step.choice),
-                key=lambda c: -(c.emission + self.language_model(previous, c)),
+                key=lambda c: -(c.emission + self.context(previous, typed, c)),
             )
             first, last = phrase.characters(start, end)
             choices = [step.choice, *others][:n]
-            tokens.append(Token(phrase.typed(start, end), first, last, choices))
+            tokens.append(Token(typed, first, last, choices))
             previous = step.previous
         return tokens
 
