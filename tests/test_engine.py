@@ -17,6 +17,7 @@ def engine():
         ("or kun", "អរគុណ"),  # one word typed as two
         ("ot mean te", "អត់មានទេ"),
         ("nham bay hoy nov", "ញ៉ាំបាយហើយនៅ"),
+        ("bong srolanh", "បងស្រឡាញ់"),  # the preferred spelling, not ស្រលាញ់
     ],
 )
 def test_convert(engine, typed, expected):

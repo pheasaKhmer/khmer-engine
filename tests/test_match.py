@@ -2,7 +2,13 @@ import pytest
 from pheasa import normalize
 
 from khmer_engine.lexicon import Lexicon
-from khmer_engine.match import Matcher, Weights, forms, read_chat_spellings
+from khmer_engine.match import (
+    Matcher,
+    Weights,
+    forms,
+    read_chat_spellings,
+    read_preferred_spellings,
+)
 
 
 @pytest.fixture(scope="module")
@@ -134,3 +140,18 @@ def test_completions_need_two_key_symbols(matcher):
 
 def test_completions_leave_out_exact_matches(matcher):
     assert "អរគុណ" not in matcher.completions("orkun")
+
+
+def test_a_variant_spelling_is_not_offered():
+    lexicon = Lexicon.sample()
+    both = [c.text for c in Matcher(lexicon).lookup("srolanh")]
+    assert {"ស្រឡាញ់", "ស្រលាញ់"} <= set(both)
+    preferred = Matcher(lexicon, preferred={"ស្រលាញ់": "ស្រឡាញ់"})
+    assert "ស្រលាញ់" not in [c.text for c in preferred.lookup("srolanh")]
+
+
+def test_packaged_preferred_spellings_point_at_sample_words():
+    preferred = read_preferred_spellings()
+    assert preferred["ស្រលាញ់"] == "ស្រឡាញ់"
+    lexicon = Lexicon.sample()
+    assert all(word in lexicon for pair in preferred.items() for word in pair)

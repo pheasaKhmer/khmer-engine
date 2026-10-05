@@ -1,0 +1,6 @@
+# Words written two ways in common use, and the spelling conversion writes. The other
+# spelling is still read when segmenting and romanizing Khmer, but never offered as a
+# conversion.
+# Columns: variant, preferred, reviewed ("yes" once a native speaker has checked the row).
+# variant	preferred	reviewed
+ស្រលាញ់	ស្រឡាញ់	yes

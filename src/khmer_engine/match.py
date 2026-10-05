@@ -11,6 +11,9 @@ Every lexicon word is indexed under several romanizations:
 - "minor": its chat spellings without the vowel of an unstressed first syllable, which
   chat often leaves out (sbay for សប្បាយ, tne for ទំនេរ)
 
+A word with a preferred spelling (`data/preferred_spellings.tsv`) is not indexed, so
+conversion writes the preferred one: ស្រឡាញ់, not ស្រលាញ់.
+
 Lookups go by matching key (see `keys`), so spelling variants land on the same entry.
 Keys one edit away are tried too. Each candidate gets an emission score, the log of how
 likely the typed spelling is for that word, from two penalties: whether the key had to
@@ -18,7 +21,7 @@ be edited, and how far the typed letters are from the closest romanization of th
 """
 
 from bisect import bisect_left
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
@@ -77,6 +80,13 @@ def read_chat_spellings(path: Path | None = None) -> list[tuple[str, str]]:
     return [(spelling, word) for spelling, word, _ in read_rows(path, 3)]
 
 
+def read_preferred_spellings(path: Path | None = None) -> dict[str, str]:
+    """Each variant spelling and the spelling to write instead; the package's own list by
+    default."""
+    path = path or Path(str(files("khmer_engine") / "data" / "preferred_spellings.tsv"))
+    return {normalize(variant): normalize(word) for variant, word, _ in read_rows(path, 3)}
+
+
 def forms(word: str, pronunciations: Iterable[str], abbreviated: bool = False) -> list[Form]:
     """The romanizations a lexicon word is indexed under, without duplicates. With
     `abbreviated`, the consonants of its chat spellings too."""
@@ -117,13 +127,17 @@ class Matcher:
         lexicon: Lexicon,
         curated: Iterable[tuple[str, str]] = (),
         weights: Weights | None = None,
+        preferred: Mapping[str, str] | None = None,
     ):
         self.lexicon = lexicon
+        preferred = preferred or {}
         self.weights = weights or Weights()
         self.index: dict[str, list[Form]] = {}
         by_count = sorted(lexicon.entries.values(), key=lambda e: -e.count)
         common = {e.word for e in by_count[:ABBREVIATED_WORDS] if e.count}
         for entry in lexicon.entries.values():
+            if preferred.get(entry.word) in lexicon:
+                continue
             for form in forms(entry.word, entry.pronunciations, entry.word in common):
                 self._add(form)
         for spelling, word in curated:
