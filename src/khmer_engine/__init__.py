@@ -5,10 +5,21 @@ from functools import cache
 
 from khmer_engine.engine import Engine, Suggestion
 from khmer_engine.lexicon import Lexicon
+from khmer_engine.romanize import Style
 
 __version__ = "0.1.0.dev0"
 
-__all__ = ["Engine", "Lexicon", "Suggestion", "__version__", "convert", "default_engine", "suggest"]
+__all__ = [
+    "Engine",
+    "Lexicon",
+    "Style",
+    "Suggestion",
+    "__version__",
+    "convert",
+    "default_engine",
+    "romanize",
+    "suggest",
+]
 
 
 @cache
@@ -27,3 +38,8 @@ def suggest(text: str, n: int = 5) -> list[Suggestion]:
 def convert(text: str) -> str:
     """The most likely Khmer for romanized `text`."""
     return default_engine().convert(text)
+
+
+def romanize(khmer: str, style: Style = "chat") -> str:
+    """Romanize Khmer text, in the "chat" style people type or the "ungegn" standard."""
+    return default_engine().romanize(khmer, style)

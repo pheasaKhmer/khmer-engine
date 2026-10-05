@@ -19,3 +19,8 @@ def test_default_engine_loads_the_data_directory_from_the_environment(tmp_path, 
         assert len(khmer_engine.default_engine().lexicon) == 1
     finally:
         khmer_engine.default_engine.cache_clear()
+
+
+def test_romanize():
+    assert khmer_engine.romanize("សុខសប្បាយទេ") == "soksabay te"
+    assert khmer_engine.romanize("សុខសប្បាយទេ", "ungegn") == "sŏkhsâbbay té"

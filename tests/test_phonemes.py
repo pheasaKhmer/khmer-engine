@@ -26,6 +26,8 @@ from khmer_engine.phonemes import to_chat
         ("ខ្ញុំ", "k ɲ o m", "knhom"),
         ("កម្ពុជា", "k a m . p u ʔ . c ie", "kampuchea"),
         ("ផ្ទះ", "p t ea h", "pteah"),
+        ("ពេញ", "p ɨ ɲ", "penh"),
+        ("នឹក", "n ɨ k", "nek"),
     ],
 )
 def test_chat_spellings(khmer, transcription, expected):
@@ -43,3 +45,15 @@ def test_syllable_without_a_vowel():
 def test_unknown_phone_is_reported():
     with pytest.raises(ValueError, match="unknown phone 'x'"):
         to_chat("x a")
+
+
+@pytest.mark.parametrize(
+    ("transcription", "expected"),
+    [
+        ("s o k . s a p . ɓ aa j", "soksabay"),  # សុខសប្បាយ: ប្ប is typed once
+        ("c ə t . t ɑ", "cheto"),
+        ("ɓ a t . ɗ ɑ m . ɓ ɑɑ ŋ", "batdombong"),  # different letters keep both
+    ],
+)
+def test_doubled_consonants_are_typed_once(transcription, expected):
+    assert to_chat(transcription) == expected

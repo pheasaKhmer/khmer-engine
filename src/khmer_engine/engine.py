@@ -2,11 +2,13 @@
 
 import math
 from dataclasses import dataclass
+from functools import cached_property
 
 from khmer_engine.decode import Choice, Conversion, Decoder, Settings
 from khmer_engine.english import read_english
 from khmer_engine.lexicon import Lexicon
 from khmer_engine.match import Matcher, Weights, read_chat_spellings
+from khmer_engine.romanize import Romanizer, Style
 from khmer_engine.transliterate import Transliterator
 from khmer_engine.user import UserDictionary
 
@@ -20,6 +22,9 @@ LEARNED_WEIGHT = 3.0
 # Extra bonus for a picked Khmer word the lexicon lacks, which the language model
 # would otherwise treat as unseen.
 LEARNED_UNKNOWN_BONUS = 5.0
+# Span readings kept between calls. A keyboard calls suggest on every keystroke, and
+# most spans of the input are the same as on the previous call.
+CHOICE_CACHE_SIZE = 4096
 
 
 @dataclass(frozen=True)
@@ -58,12 +63,21 @@ class Engine:
         self.english = read_english() if english is None else english
         self.transliterator = Transliterator.from_lexicon(self.lexicon)
         self.user = user or UserDictionary()
+        self._choice_cache: dict[tuple[str, bool], list[Choice]] = {}
         self.decoder = Decoder(self.lexicon, self.choices, settings)
 
     def choices(self, typed: str, whole: bool = True) -> list[Choice]:
         """Every reading of one span of typed text, with its emission score. A piece of a
         typed word (`whole` false) only matches keys exactly and is never English. A
         single typed word can also be transliterated or, as a last resort, kept."""
+        cached = self._choice_cache.get((typed, whole))
+        if cached is None:
+            if len(self._choice_cache) >= CHOICE_CACHE_SIZE:
+                self._choice_cache.clear()
+            cached = self._choice_cache[typed, whole] = self._choices(typed, whole)
+        return cached
+
+    def _choices(self, typed: str, whole: bool) -> list[Choice]:
         out = [
             Choice(word, emission, form.source, form.spelling)
             for word, (emission, form) in self.matcher.emissions(typed, fuzzy_keys=whole).items()
@@ -101,6 +115,7 @@ class Engine:
     def learn(self, typed: str, word: str) -> None:
         """Record that the user picked `word` for `typed`, so it ranks higher next time."""
         self.user.learn(typed, word)
+        self._choice_cache.clear()
 
     def suggest(self, text: str, n: int = 5) -> list[Suggestion]:
         """Ranked readings of the last word of `text`, in the context of the words before
@@ -124,6 +139,15 @@ class Engine:
                     choice.text, score, last.start, last.end, choice.source
                 )
         return sorted(best.values(), key=lambda s: -s.score)[:n]
+
+    @cached_property
+    def romanizer(self) -> Romanizer:
+        return Romanizer(self.lexicon)
+
+    def romanize(self, khmer: str, style: Style = "chat") -> str:
+        """Romanize Khmer text: "chat" spells words the way people type them, "ungegn"
+        follows the UNGEGN standard."""
+        return self.romanizer.romanize(khmer, style)
 
     def analyze(self, text: str, n: int = 5) -> Conversion:
         """The best conversion, the n best alternatives, and ranked choices per span."""

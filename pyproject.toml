@@ -21,6 +21,9 @@ classifiers = [
 ]
 dependencies = ["pheasa>=0.1.0"]
 
+[project.scripts]
+khmer-engine = "khmer_engine.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/pheasaKhmer/khmer-engine"
 Repository = "https://github.com/pheasaKhmer/khmer-engine"
