@@ -2,6 +2,7 @@
 # One lowercase word per line. Words that are also common chat spellings of Khmer
 # words are left out on purpose: me (ម៉ែ), men (មិន), mean (មាន), ban (បាន),
 # bay (បាយ), day (ដៃ), so (ស), to (តុ), the (ទេ), pen (ពេញ), say, may, an, at, on, in.
+# So are loanwords written in Khmer script in chat: coffee (កាហ្វេ).
 ok
 okay
 hi
@@ -120,7 +121,6 @@ update
 download
 upload
 file
-coffee
 latte
 pizza
 burger
