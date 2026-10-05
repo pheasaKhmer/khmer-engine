@@ -1,6 +1,6 @@
 import pytest
 
-from khmer_engine.decode import Choice, Decoder, _Phrase, _segments, join
+from khmer_engine.decode import Choice, Decoder, Settings, _Phrase, _segments, join
 from khmer_engine.lexicon import Lexicon
 
 
@@ -59,6 +59,26 @@ def test_tokens_put_the_chosen_reading_first(decoder):
     assert (bong.typed, bong.start, bong.end) == ("bong", 0, 4)
     assert [c.text for c in bong.choices] == ["បង់", "បង"]
     assert luy.choices[0].text == "លុយ"
+
+
+def test_a_learned_bonus_can_depend_on_the_previous_word(decoder):
+    def learned(previous, typed, choice):
+        return 10.0 if (previous, typed, choice.text) == ("លុយ", "bong", "បង") else 0.0
+
+    with_learning = Decoder(decoder.lexicon, decoder.choices, learned=learned)
+    assert with_learning.convert("luy bong").text == "លុយបង"
+    assert with_learning.convert("bong luy").text == "បង់លុយ"
+
+
+def test_learned_choices_survive_the_cut_before_the_search(decoder):
+    def learned(previous, typed, choice):
+        return 10.0 if choice.text == "បង" else 0.0
+
+    narrow = Settings(choices_per_span=1)
+    plain = Decoder(decoder.lexicon, decoder.choices, narrow)
+    assert [c.text for c in plain._ranked("bong", True)] == ["បង់"]
+    learning = Decoder(decoder.lexicon, decoder.choices, narrow, learned)
+    assert [c.text for c in learning._ranked("bong", True)] == ["បង់", "បង"]
 
 
 def test_text_without_any_reading_is_kept(decoder):
