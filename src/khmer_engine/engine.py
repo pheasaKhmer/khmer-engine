@@ -18,10 +18,15 @@ from khmer_engine.user import UserDictionary
 FALLBACK_EMISSION = -8.0
 # Emission of keeping a typed word as it is, when nothing else reads it.
 TYPED_EMISSION = -20.0
-# Bonus per log(1 + times picked) for what the user picked before for the same key.
+# Bonus per log(1 + times picked) for what the user picked before for the same key, after
+# the same previous word.
 LEARNED_WEIGHT = 3.0
-# Extra bonus for a picked Khmer word the lexicon lacks, which the language model
-# would otherwise treat as unseen.
+# Bonus per log(1 + other previous words it was picked after). Smaller, and counting
+# places rather than picks: "te" picked as តេ again and again after ចាំ should not
+# displace ទេ everywhere, but a name picked in several places should rise in new ones.
+LEARNED_ELSEWHERE_WEIGHT = 1.5
+# Emission of a picked Khmer word the lexicon lacks, which the language model would
+# otherwise treat as unseen.
 LEARNED_UNKNOWN_BONUS = 5.0
 # Span readings kept between calls. A keyboard calls suggest on every keystroke, and
 # most spans of the input are the same as on the previous call.
@@ -72,7 +77,7 @@ class Engine:
         # garbage collection keeps a full collection, which would walk millions of
         # objects, from pausing a keystroke for tens of milliseconds.
         gc.freeze()
-        self.decoder = Decoder(self.lexicon, self.choices, settings)
+        self.decoder = Decoder(self.lexicon, self.choices, settings, self.learned_bonus)
 
     def choices(self, typed: str, whole: bool = True) -> list[Choice]:
         """Every reading of one span of typed text, with its emission score. A piece of a
@@ -100,29 +105,31 @@ class Engine:
         return self._with_picks(typed, out) if whole else out
 
     def _with_picks(self, typed: str, choices: list[Choice]) -> list[Choice]:
-        picks = self.user.picks(typed)
-        if not picks:
-            return choices
-        out = []
-        for choice in choices:
-            if choice.text in picks:
-                bonus = LEARNED_WEIGHT * math.log1p(picks[choice.text])
-                choice = Choice(
-                    choice.text, choice.emission + bonus, choice.source, choice.spelling
-                )
-            out.append(choice)
-        offered = {c.text for c in out}
-        for word, count in picks.items():
-            if word not in offered:
-                bonus = LEARNED_WEIGHT * math.log1p(count)
-                if word not in self.lexicon:
-                    bonus += LEARNED_UNKNOWN_BONUS
-                out.append(Choice(word, bonus, "learned", typed.lower()))
+        """Offer every word picked for `typed` before, after any word. How much a pick
+        counts depends on the previous word, so the decoder adds that (`learned_bonus`)."""
+        offered = {c.text for c in choices}
+        picked = {word for words in self.user.picks(typed).values() for word in words}
+        out = list(choices)
+        for word in sorted(picked - offered):
+            emission = 0.0 if word in self.lexicon else LEARNED_UNKNOWN_BONUS
+            out.append(Choice(word, emission, "learned", typed.lower()))
         return out
 
-    def learn(self, typed: str, word: str) -> None:
-        """Record that the user picked `word` for `typed`, so it ranks higher next time."""
-        self.user.learn(typed, word)
+    def learned_bonus(self, previous: str | None, typed: str, choice: Choice) -> float:
+        """The bonus for `choice` from what the user picked for `typed`: picks after the
+        Khmer word `previous` count fully; after other words, each word counts once."""
+        picks = self.user.picks(typed)
+        if not picks or not choice.is_khmer:
+            return 0.0
+        context = previous or ""
+        here = picks.get(context, {}).get(choice.text, 0)
+        elsewhere = sum(1 for p, words in picks.items() if p != context and choice.text in words)
+        return LEARNED_WEIGHT * math.log1p(here) + LEARNED_ELSEWHERE_WEIGHT * math.log1p(elsewhere)
+
+    def learn(self, typed: str, word: str, previous: str | None = None) -> None:
+        """Record that the user picked `word` for `typed` after the Khmer word `previous`
+        (None at the start of the text), so it ranks higher next time."""
+        self.user.learn(typed, word, previous)
         self._choice_cache.clear()
 
     def suggest(self, text: str, n: int = 5) -> list[Suggestion]:
@@ -141,7 +148,7 @@ class Engine:
                 candidates.append(Choice(word, emission, "completion", form.spelling))
         best: dict[str, Suggestion] = {}
         for choice in candidates:
-            score = choice.emission + self.decoder.language_model(previous, choice)
+            score = choice.emission + self.decoder.context(previous, last.typed, choice)
             if choice.text not in best or score > best[choice.text].score:
                 best[choice.text] = Suggestion(
                     choice.text, score, last.start, last.end, choice.source
