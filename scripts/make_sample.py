@@ -6,13 +6,13 @@ Run `make data` first, then `make sample`.
 """
 
 import argparse
-import re
 from collections import Counter
 from pathlib import Path
 
 from pheasa import normalize
 
-from khmer_engine.lexicon import read_rows
+from khmer_engine.lexicon import Lexicon, read_rows
+from khmer_engine.segment import KHMER_RUN, Segmenter
 
 PACKAGE_DATA = Path("src/khmer_engine/data")
 
@@ -23,11 +23,10 @@ REQUIRED_FROM = [
     Path("tests/sample_words.txt"),
 ]
 
-_KHMER_WORD = re.compile("[\\u1780-\\u17d3\\u17dd\\u200c\\u200d]+")
 
-
-def required_words(paths: list[Path], lexicon: set[str]) -> set[str]:
-    """Khmer words named in `paths`: whole fields if they are lexicon words, else runs."""
+def required_words(paths: list[Path], lexicon: Lexicon) -> set[str]:
+    """Lexicon words in the Khmer text of `paths`. Phrases are segmented into words."""
+    segmenter = Segmenter({w: -lexicon.logprob(w) for w in lexicon.entries}, unknown_cost=30)
     found: set[str] = set()
     for path in paths:
         if not path.exists():
@@ -35,10 +34,8 @@ def required_words(paths: list[Path], lexicon: set[str]) -> set[str]:
         for line in path.read_text(encoding="utf-8").splitlines():
             if line.startswith("#"):
                 continue
-            for run in _KHMER_WORD.findall(line):
-                run = normalize(run)
-                if run in lexicon:
-                    found.add(run)
+            for run in KHMER_RUN.findall(line):
+                found.update(w.text for w in segmenter.segment(normalize(run)) if w.known)
     return found
 
 
@@ -51,9 +48,8 @@ def main() -> None:
     args = parser.parse_args()
 
     rows = list(read_rows(args.build / "lexicon.tsv", 3))
-    counts = {word: int(count) for word, count, _ in rows}
     keep = {word for word, _, _ in rows[: args.words]}
-    missing = required_words(REQUIRED_FROM, set(counts)) - keep
+    missing = required_words(REQUIRED_FROM, Lexicon.load(args.build)) - keep
     keep |= missing
 
     pairs: Counter[tuple[str, str]] = Counter()
