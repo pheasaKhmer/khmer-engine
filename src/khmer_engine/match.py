@@ -15,12 +15,14 @@ be edited, and how far the typed letters are from the closest romanization of th
 
 from collections.abc import Iterable
 from dataclasses import dataclass
+from importlib.resources import files
+from pathlib import Path
 
 from pheasa import normalize
 
 from khmer_engine import fuzzy
 from khmer_engine.keys import fold, key
-from khmer_engine.lexicon import Lexicon
+from khmer_engine.lexicon import Lexicon, read_rows
 from khmer_engine.phonemes import to_chat
 from khmer_engine.rules import romanize_word
 
@@ -54,6 +56,12 @@ class Candidate:
     score: float
     spelling: str
     source: str
+
+
+def read_chat_spellings(path: Path | None = None) -> list[tuple[str, str]]:
+    """Curated (spelling, Khmer word) pairs; the package's own list by default."""
+    path = path or Path(str(files("khmer_engine") / "data" / "chat_spellings.tsv"))
+    return [(spelling, word) for spelling, word, _ in read_rows(path, 3)]
 
 
 def forms(word: str, pronunciations: Iterable[str]) -> list[Form]:

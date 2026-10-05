@@ -1,7 +1,8 @@
 import pytest
+from pheasa import normalize
 
 from khmer_engine.lexicon import Lexicon
-from khmer_engine.match import Matcher, Weights, forms
+from khmer_engine.match import Matcher, Weights, forms, read_chat_spellings
 
 
 @pytest.fixture(scope="module")
@@ -80,3 +81,10 @@ def test_weights_change_the_ranking():
     heavy = Matcher(lexicon, weights=Weights(key_edit=0.1, spelling=0.1, frequency=5.0))
     light = Matcher(lexicon, weights=Weights(frequency=0.0))
     assert heavy.lookup("rean")[0].text != light.lookup("rean")[0].text
+
+
+def test_packaged_chat_spellings_point_at_sample_words():
+    spellings = read_chat_spellings()
+    assert ("jg", "ចង់") in spellings
+    lexicon = Lexicon.sample()
+    assert all(normalize(word) in lexicon for _, word in spellings)

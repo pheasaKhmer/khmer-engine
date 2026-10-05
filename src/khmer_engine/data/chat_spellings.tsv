@@ -1,0 +1,31 @@
+# Hand-written chat spellings: abbreviations and habits that neither the pronunciation
+# nor the spelling of a word predicts. A match here gets a bonus over other candidates.
+# Columns: spelling, khmer, reviewed ("yes" once a native speaker has checked the row).
+# Keep this list short. The evaluation set measures how well the engine guesses
+# without it, and words listed here are easy wins there.
+# spelling	khmer	reviewed
+sous dey	សួស្តី	no
+orkun	អរគុណ	no
+bong	បង	no
+oun	អូន	no
+nham	ញ៉ាំ	no
+ot	អត់	no
+te	ទេ	no
+jg	ចង់	no
+chong	ចង់	no
+hoy	ហើយ	no
+hery	ហើយ	no
+jas	ចាស	no
+chas	ចាស	no
+bat	បាទ	no
+oy	ឱ្យ	no
+aoy	ឱ្យ	no
+ey	អី	no
+avey	អ្វី	no
+nis	នេះ	no
+nus	នោះ	no
+nhom	ខ្ញុំ	no
+kom	កុំ	no
+min	មិន	no
+pdey	ប្តី	no
+bros	ប្រុស	no
