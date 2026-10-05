@@ -113,9 +113,12 @@ English words on a list stay as typed, at a cost, so a good Khmer reading still 
 A word nothing reads is spelled syllable by syllable from a table learned from the lexicon
 (`knhom chmous sreymom` → ខ្ញុំឈ្មោះស្រីមុំ †), or kept as typed.
 
-**6. Learning.** A picked candidate is counted under the key of what was typed and ranks
-higher next time, for that spelling and its variants. Picks stay on the device, in memory
-or in a JSON file.
+**6. Learning.** A picked candidate is counted under the key of what was typed and the
+Khmer word before it, and ranks higher next time, for that spelling and its variants. A
+pick counts fully after the same word and less after others, where each other word counts
+once however often it was picked there: picking តេ for `te` after ចាំ makes `jam te` ចាំតេ
+without pushing ទេ down in `ot mean te`, while a name picked in several places rises in
+new ones too. Picks stay on the device, in memory or in a JSON file.
 
 ### Khmer → romanized
 
