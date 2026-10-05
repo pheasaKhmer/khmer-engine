@@ -179,7 +179,11 @@ class Decoder:
         return self.settings.language_model * score
 
     def _ranked(self, typed: str, whole: bool) -> list[Choice]:
-        ranked = sorted(self.choices(typed, whole), key=lambda c: -c.emission)
+        """The span's best choices without context, so the search only weighs those."""
+        ranked = sorted(
+            self.choices(typed, whole),
+            key=lambda c: -(c.emission + self._language_model(None, c)),
+        )
         return ranked[: self.settings.choices_per_span]
 
     def _spans(self, phrase: _Phrase) -> dict[tuple[int, int], tuple[list[Choice], float]]:
