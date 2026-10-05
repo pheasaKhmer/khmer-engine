@@ -60,6 +60,7 @@ class Settings:
     """Search parameters. Tuned on eval/testset.tsv."""
 
     language_model: float = 0.7  # weight of the bigram log probability
+    english: float = 7.0  # cost of keeping a word in English, about a mid-frequency word
     join: float = 1.0  # cost per space inside a span ("or kun")
     max_words_per_span: int = 3
     choices_per_span: int = 8
@@ -135,7 +136,7 @@ class Decoder:
 
     def _language_model(self, previous: str | None, choice: Choice) -> float:
         if not choice.is_khmer:
-            return 0.0
+            return -self.settings.english
         if previous is None:
             score = self.lexicon.logprob(choice.text)
         else:

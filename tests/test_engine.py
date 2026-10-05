@@ -44,3 +44,21 @@ def test_alternatives_start_with_the_best_conversion(engine):
     assert result.alternatives[0] == result.text
     assert 1 < len(result.alternatives) <= 3
     assert len(set(result.alternatives)) == len(result.alternatives)
+
+
+@pytest.mark.parametrize(
+    ("typed", "expected"),
+    [
+        ("ot mean wifi te", "អត់មាន wifi ទេ"),
+        ("ok bong", "ok បង"),
+        ("send photo mok", "send photo មក"),
+        ("iPhone thmey", "iPhone ថ្មី"),  # the typed case is kept
+    ],
+)
+def test_english_words_stay_in_latin_letters(engine, typed, expected):
+    assert engine.convert(typed) == expected
+
+
+def test_words_on_the_english_list_can_still_be_khmer():
+    # Keeping a word in English has a cost, so a good Khmer reading in context wins.
+    assert Engine(english=frozenset({"te"})).convert("ot mean te") == "អត់មានទេ"
