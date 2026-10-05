@@ -3,6 +3,7 @@
     uv run python eval/evaluate.py                     # bundled sample lexicon
     uv run python eval/evaluate.py --data data/build   # full lexicon
     uv run python eval/evaluate.py --failures          # list the phrases it gets wrong
+    uv run python eval/evaluate.py --testset eval/native.tsv  # typed by a native speaker
 
 Accuracy: for each (romanized, Khmer) pair in the test set, whether the best conversion
 is right (top 1) and whether the right one is among the five best (top 5). Phrases of

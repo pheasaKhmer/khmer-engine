@@ -13,9 +13,11 @@ format:
 test:
 	uv run pytest
 
-# Fails if top-1 accuracy on the bundled sample drops below 85% (it is 86.5%).
+# Fails if top-1 accuracy on the bundled sample drops below 85% (it is 86.5%). The
+# phrases typed by a native speaker are reported, not gated.
 eval:
 	uv run python eval/evaluate.py --min-top1 0.85
+	uv run python eval/evaluate.py --testset eval/native.tsv
 
 data:
 	uv run --group data python scripts/build_data.py
