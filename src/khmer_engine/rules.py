@@ -10,6 +10,7 @@ Two styles:
   standard to how people type Khmer in Latin letters.
 """
 
+from collections.abc import Sequence
 from typing import Literal
 
 from khmer_engine import script
@@ -227,7 +228,7 @@ def _syllable(syllable: Syllable, previous: Syllable | None, style: Style) -> st
     return head + robat + "".join(finals[spelled:])
 
 
-def romanize_syllables(parts: list[Syllable], style: Style = "ungegn") -> str:
+def romanize_syllables(parts: Sequence[Syllable], style: Style = "ungegn") -> str:
     """Romanize a word given as syllables."""
     out = []
     previous = None

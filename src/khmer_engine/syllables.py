@@ -16,6 +16,7 @@ readings and keeps the cheapest. The costs encode a few preferences:
 
 from dataclasses import dataclass, field
 from enum import IntEnum
+from functools import lru_cache
 
 from pheasa import normalize
 
@@ -284,11 +285,15 @@ def _close(syllable: _SyllableBuilder, letters: tuple[str, ...], text: str, sign
         syllable.silent_finals = True
 
 
-def syllables(word: str) -> list[Syllable]:
-    """Split a Khmer word into syllables. The word is normalized with pheasa first."""
+@lru_cache(maxsize=4096)
+def syllables(word: str) -> tuple[Syllable, ...]:
+    """Split a Khmer word into syllables. The word is normalized with pheasa first.
+
+    Results are cached: building the index splits every lexicon word for each
+    romanization style and again for the syllable table."""
     cs = clusters(normalize(word))
     if not cs:
-        return []
+        return ()
     out: list[_SyllableBuilder] = []
     for cluster, action in zip(cs, _best_actions(cs), strict=True):
         letters = (cluster.base, *cluster.subscripts) if cluster.base else ()
@@ -302,4 +307,4 @@ def syllables(word: str) -> list[Syllable]:
             out.append(_start(cluster, cluster.text[cut:], cluster.subscripts, subscript=True))
         else:
             out.append(_start(cluster, cluster.text, letters, subscript=False))
-    return [s.build() for s in out]
+    return tuple(s.build() for s in out)

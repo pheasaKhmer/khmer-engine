@@ -106,7 +106,7 @@ def test_series(word, expected):
 
 
 def test_empty_word():
-    assert syllables("") == []
+    assert syllables("") == ()
 
 
 def test_independent_vowel_as_subscript_is_a_nucleus():
