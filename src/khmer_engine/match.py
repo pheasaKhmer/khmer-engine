@@ -6,6 +6,8 @@ Every lexicon word is indexed under several romanizations:
 - "spelling": the rule-based chat style, the way it is written (pros, khmer)
 - "ungegn": the UNGEGN style, for people who type standard romanization
 - "curated": hand-written chat spellings, including abbreviations (jg)
+- "consonants": the consonants of its chat spellings, for the most common words, which
+  chat abbreviates that way (tv for ទៅ, dg for ដឹង)
 
 Lookups go by matching key (see `keys`), so spelling variants land on the same entry.
 Keys one edit away are tried too. Each candidate gets an emission score, the log of how
@@ -22,7 +24,7 @@ from pathlib import Path
 from pheasa import normalize
 
 from khmer_engine import fuzzy
-from khmer_engine.keys import fold, key
+from khmer_engine.keys import consonants, fold, key
 from khmer_engine.lexicon import Lexicon, read_rows
 from khmer_engine.phonemes import to_chat
 from khmer_engine.rules import romanize_word
@@ -30,6 +32,7 @@ from khmer_engine.rules import romanize_word
 MIN_FUZZY_KEY = 3  # shorter keys have too many neighbours to edit
 MIN_COMPLETION_KEY = 2  # shorter prefixes start too many words to be useful
 MAX_COMPLETION_SCAN = 5000  # keys looked at per completion lookup
+ABBREVIATED_WORDS = 5000  # the most common words are also indexed by their consonants
 
 
 @dataclass(frozen=True)
@@ -39,6 +42,7 @@ class Weights:
     key_edit: float = 5.0  # the key needed one edit
     spelling: float = 5.0  # times the normalized letter distance to the closest romanization
     curated: float = 1.5  # bonus when a hand-written chat spelling matched
+    abbreviation: float = 2.0  # only the consonants of the word were typed
     frequency: float = 0.5  # weight of the word's log probability in `lookup`
     completion: float = 2.0  # the word is longer than what was typed so far
     missing: float = 0.5  # per key symbol not typed yet
@@ -69,8 +73,9 @@ def read_chat_spellings(path: Path | None = None) -> list[tuple[str, str]]:
     return [(spelling, word) for spelling, word, _ in read_rows(path, 3)]
 
 
-def forms(word: str, pronunciations: Iterable[str]) -> list[Form]:
-    """The romanizations a lexicon word is indexed under, without duplicates."""
+def forms(word: str, pronunciations: Iterable[str], abbreviated: bool = False) -> list[Form]:
+    """The romanizations a lexicon word is indexed under, without duplicates. With
+    `abbreviated`, the consonants of its chat spellings too."""
     out: dict[str, Form] = {}
     for pronunciation in pronunciations:
         spelling = to_chat(pronunciation)
@@ -78,6 +83,10 @@ def forms(word: str, pronunciations: Iterable[str]) -> list[Form]:
     for style, source in (("chat", "spelling"), ("ungegn", "ungegn")):
         spelling = fold(romanize_word(word, style))
         out.setdefault(spelling, Form(word, spelling, source))
+    if abbreviated:
+        chat = [f.spelling for f in out.values() if f.source != "ungegn"]
+        for abbreviation in filter(None, map(consonants, chat)):
+            out.setdefault(abbreviation, Form(word, abbreviation, "consonants"))
     return list(out.values())
 
 
@@ -91,8 +100,10 @@ class Matcher:
         self.lexicon = lexicon
         self.weights = weights or Weights()
         self.index: dict[str, list[Form]] = {}
+        by_count = sorted(lexicon.entries.values(), key=lambda e: -e.count)
+        common = {e.word for e in by_count[:ABBREVIATED_WORDS] if e.count}
         for entry in lexicon.entries.values():
-            for form in forms(entry.word, entry.pronunciations):
+            for form in forms(entry.word, entry.pronunciations, entry.word in common):
                 self._add(form)
         for spelling, word in curated:
             self._add(Form(normalize(word), fold(spelling), "curated"))
@@ -122,6 +133,8 @@ class Matcher:
             score -= self.weights.spelling * letters / max(len(typed), len(form.spelling))
             if form.source == "curated":
                 score += self.weights.curated
+            elif form.source == "consonants":
+                score -= self.weights.abbreviation
             if form.word not in best or score > best[form.word][0]:
                 best[form.word] = (score, form)
         return best

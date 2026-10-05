@@ -68,6 +68,17 @@ def _vowel_run(run: str) -> list[str]:
     return out
 
 
+def consonants(spelling: str) -> str | None:
+    """The consonant letters of a romanization, the way chat abbreviates a common word:
+    "tov" is "tv" and "deng" is "dg", since chat writes ng as g at the end of an
+    abbreviation. None if fewer than two consonants are left, as a single letter could
+    stand for too many words."""
+    units = [unit for unit in _UNITS.findall(fold(spelling)) if unit not in _VOWEL_LETTERS]
+    if len(units) < 2:
+        return None
+    return "".join("g" if unit == "ng" else unit for unit in units)
+
+
 def key(text: str, final: bool = True) -> str:
     """The matching key of a romanized spelling. With `final` false the text is taken
     to continue (a syllable inside a word, or a word still being typed), so the rules

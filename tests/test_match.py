@@ -15,6 +15,12 @@ def test_words_are_indexed_under_each_romanization():
     assert by_source == {"pronunciation": "kmae", "spelling": "khmaer", "ungegn": "khmer"}
 
 
+def test_common_words_are_indexed_by_their_consonants_too():
+    by_source = {f.source: f.spelling for f in forms("ទៅ", ["t ɨ w"], abbreviated=True)}
+    assert by_source["consonants"] == "tv"
+    assert "consonants" not in {f.source for f in forms("ទៅ", ["t ɨ w"])}
+
+
 def test_duplicate_romanizations_are_indexed_once():
     spellings = [f.spelling for f in forms("ទៅ", ["t ɨ w"])]
     assert len(spellings) == len(set(spellings))
@@ -61,6 +67,16 @@ def test_a_misspelled_key_is_found_one_edit_away(matcher):
 def test_curated_spellings(matcher):
     best = matcher.lookup("jg")[0]
     assert (best.text, best.source) == ("ចង់", "curated")
+
+
+@pytest.mark.parametrize(("typed", "expected"), [("tv", "ទៅ"), ("nv", "នៅ"), ("dg", "ដឹង")])
+def test_consonants_find_a_common_word(matcher, typed, expected):
+    best = matcher.lookup(typed)[0]
+    assert (best.text, best.source) == (expected, "consonants")
+
+
+def test_typing_the_vowels_too_matches_better(matcher):
+    assert matcher.lookup("tov")[0].score > matcher.lookup("tv")[0].score
 
 
 def test_candidates_are_ranked_and_limited(matcher):

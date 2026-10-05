@@ -1,6 +1,6 @@
 import pytest
 
-from khmer_engine.keys import fold, key
+from khmer_engine.keys import consonants, fold, key
 
 
 def test_fold_keeps_lowercase_ascii_letters():
@@ -64,3 +64,11 @@ def test_text_that_continues_keeps_its_last_r_h_and_s():
     assert key("dar") == "dA"
     assert key("dar", final=False) == "dAr"
     assert key("preah", final=False) == "prJh"
+
+
+@pytest.mark.parametrize(
+    ("spelling", "expected"),
+    [("tov", "tv"), ("deng", "dg"), ("chong", "chg"), ("kheng", "khg"), ("te", None), ("", None)],
+)
+def test_consonants_abbreviate_a_spelling(spelling, expected):
+    assert consonants(spelling) == expected
