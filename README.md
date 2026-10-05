@@ -178,8 +178,8 @@ way they chat, when shown the Khmer; it is the harder and more honest one.
 | Test set, top 1 | 88.1% | 93.7% |
 | Test set, top 5 | 97.6% | 98.4% |
 | Test set, phrases of several words typed without spaces, top 1 | 83.0% | 90.4% |
-| Native speaker set, top 1 | 72.3% | 75.4% |
-| Native speaker set, top 5 | 81.5% | 83.1% |
+| Native speaker set, top 1 | 76.9% | 81.5% |
+| Native speaker set, top 5 | 84.6% | 89.2% |
 | `suggest` per keystroke, 5-word input | median 0.3 ms, max 1.2 ms | median 0.8 ms, max 4.1 ms |
 | Engine start | 0.1 s | 4.2 s |
 
@@ -199,7 +199,7 @@ is rare.
 These need a native speaker. Each data file has a `reviewed` column to fill in.
 
 - `eval/testset.tsv`: all 126 phrases and their Khmer
-- `src/khmer_engine/data/chat_spellings.tsv`: 15 of the 35 curated chat spellings
+- `src/khmer_engine/data/chat_spellings.tsv`: 15 of the 38 curated chat spellings
 - Choices in `phonemes.py` about how sounds are typed: short ɨ as `e` (`penh`, `nek`),
   long ɑ without a final as `or` (`orkun`, `lor`), ទៅ as `tov`
 - The examples marked † in this README

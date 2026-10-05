@@ -14,7 +14,7 @@ test:
 	uv run pytest
 
 # Fails if top-1 accuracy on the bundled sample drops below 85% on the test set (it is
-# 88.1%) or below 70% on the phrases typed by a native speaker (it is 72.3%).
+# 88.1%) or below 70% on the phrases typed by a native speaker (it is 76.9%).
 eval:
 	uv run python eval/evaluate.py --min-top1 0.85
 	uv run python eval/evaluate.py --testset eval/native.tsv --min-top1 0.70
