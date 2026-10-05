@@ -88,3 +88,17 @@ def test_packaged_chat_spellings_point_at_sample_words():
     assert ("jg", "ចង់") in spellings
     lexicon = Lexicon.sample()
     assert all(normalize(word) in lexicon for _, word in spellings)
+
+
+def test_completions_start_with_what_was_typed(matcher):
+    found = matcher.completions("orku")
+    assert "អរគុណ" in found
+    assert all(score < 0 for score, _ in found.values())
+
+
+def test_completions_need_two_key_symbols(matcher):
+    assert matcher.completions("o") == {}
+
+
+def test_completions_leave_out_exact_matches(matcher):
+    assert "អរគុណ" not in matcher.completions("orkun")

@@ -58,3 +58,9 @@ def test_r_before_a_vowel_is_kept():
 def test_empty():
     assert key("") == ""
     assert key("123 ?!") == ""
+
+
+def test_text_that_continues_keeps_its_last_r_h_and_s():
+    assert key("dar") == "dA"
+    assert key("dar", final=False) == "dAr"
+    assert key("preah", final=False) == "prJh"
