@@ -17,13 +17,13 @@ from pheasa import normalize
 from khmer_engine.lexicon import Lexicon
 from khmer_engine.phonemes import to_chat
 from khmer_engine.rules import romanize_word
+from khmer_engine.script import LEK_TOO
 from khmer_engine.segment import KHMER_RUN, Segmenter, Word
 from khmer_engine.syllables import clusters
 
 Style = Literal["chat", "ungegn"]
 
 PUNCTUATION = {"។": ".", "៕": ".", "៖": ":", "៘": "...", "៚": "...", "៙": "", "៛": " riel"}
-REPEAT = "ៗ"
 
 # Longest first, so chh is tried before ch.
 _ASPIRATED = (("chh", "ch"), ("ph", "p"), ("th", "t"), ("kh", "k"))
@@ -110,7 +110,7 @@ class Romanizer:
     @staticmethod
     def _between(out: list[str], text: str, last_word: str) -> str:
         for i, ch in enumerate(text):
-            if ch == REPEAT and last_word:
+            if ch == LEK_TOO and last_word:
                 _append(out, " " + last_word)
             elif ch in PUNCTUATION:
                 out.append(PUNCTUATION[ch])
