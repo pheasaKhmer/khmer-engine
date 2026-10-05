@@ -4,7 +4,8 @@ dynamic = ["version"]
 description = "Convert chat-style romanized Khmer to Khmer script and back."
 readme = "README.md"
 requires-python = ">=3.11"
-license = "MIT"
+# Code is MIT. The bundled sample data keeps the licenses of its sources (data/README.md).
+license = "MIT AND CC-BY-4.0 AND ODC-By-1.0"
 license-files = ["LICENSE"]
 authors = [{ name = "Samputhy Khim" }]
 maintainers = [{ name = "Samputhy Khim" }]
@@ -26,6 +27,9 @@ Repository = "https://github.com/pheasaKhmer/khmer-engine"
 Issues = "https://github.com/pheasaKhmer/khmer-engine/issues"
 
 [dependency-groups]
+data = [
+    "pyarrow>=25.0.1",
+]
 dev = [
     "pytest>=9.1.1",
     "ruff>=0.16.9",
@@ -51,6 +55,8 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+# IPA letters in phonemic transcriptions, not typos for a and ?.
+allowed-confusables = ["ɑ", "ʔ"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

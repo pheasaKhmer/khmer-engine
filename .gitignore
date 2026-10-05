@@ -12,3 +12,7 @@ htmlcov/
 .env
 .env.*
 .DS_Store
+
+# Downloaded sources and built data (make data)
+data/raw/
+data/build/
