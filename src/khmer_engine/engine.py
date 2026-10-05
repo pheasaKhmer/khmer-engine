@@ -2,11 +2,13 @@
 
 import math
 from dataclasses import dataclass
+from functools import cached_property
 
 from khmer_engine.decode import Choice, Conversion, Decoder, Settings
 from khmer_engine.english import read_english
 from khmer_engine.lexicon import Lexicon
 from khmer_engine.match import Matcher, Weights, read_chat_spellings
+from khmer_engine.romanize import Romanizer, Style
 from khmer_engine.transliterate import Transliterator
 from khmer_engine.user import UserDictionary
 
@@ -124,6 +126,15 @@ class Engine:
                     choice.text, score, last.start, last.end, choice.source
                 )
         return sorted(best.values(), key=lambda s: -s.score)[:n]
+
+    @cached_property
+    def romanizer(self) -> Romanizer:
+        return Romanizer(self.lexicon)
+
+    def romanize(self, khmer: str, style: Style = "chat") -> str:
+        """Romanize Khmer text: "chat" spells words the way people type them, "ungegn"
+        follows the UNGEGN standard."""
+        return self.romanizer.romanize(khmer, style)
 
     def analyze(self, text: str, n: int = 5) -> Conversion:
         """The best conversion, the n best alternatives, and ranked choices per span."""
