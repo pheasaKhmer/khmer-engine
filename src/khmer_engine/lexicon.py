@@ -73,9 +73,17 @@ class Lexicon:
     @classmethod
     def load(cls, directory: Path | str) -> "Lexicon":
         directory = Path(directory)
+        # Word pairs repeat the same words many times; normalize each one once.
+        normalized: dict[str, str] = {}
+
+        def norm(text: str) -> str:
+            if text not in normalized:
+                normalized[text] = normalize(text)
+            return normalized[text]
+
         entries: dict[str, Entry] = {}
         for word, count, pronunciations in read_rows(directory / "lexicon.tsv", 3):
-            word = normalize(word)
+            word = norm(word)
             prons = tuple(p for p in pronunciations.split("|") if p)
             if word in entries:  # two spellings that normalize to the same word
                 old = entries[word]
@@ -87,7 +95,7 @@ class Lexicon:
         bigram_path = directory / "bigrams.tsv"
         if bigram_path.exists():
             for first, second, count in read_rows(bigram_path, 3):
-                key = (normalize(first), normalize(second))
+                key = (norm(first), norm(second))
                 bigrams[key] = bigrams.get(key, 0) + int(count)
         return cls(entries, bigrams)
 
