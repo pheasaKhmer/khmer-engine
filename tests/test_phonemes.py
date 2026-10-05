@@ -26,6 +26,8 @@ from khmer_engine.phonemes import to_chat
         ("ខ្ញុំ", "k ɲ o m", "knhom"),
         ("កម្ពុជា", "k a m . p u ʔ . c ie", "kampuchea"),
         ("ផ្ទះ", "p t ea h", "pteah"),
+        ("ពេញ", "p ɨ ɲ", "penh"),
+        ("នឹក", "n ɨ k", "nek"),
     ],
 )
 def test_chat_spellings(khmer, transcription, expected):
