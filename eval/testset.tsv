@@ -1,0 +1,131 @@
+# Chat-style romanized Khmer and the Khmer it should convert to.
+# Columns: romanized, khmer, reviewed ("yes" once a native speaker has checked the row).
+# Khmer is written without spaces between words, as in normal Khmer text. English words
+# stay in Latin letters with a space on each side.
+# romanized	khmer	reviewed
+sous dey	សួស្តី	no
+suosdey	សួស្តី	no
+sousdey bong	សួស្តីបង	no
+orkun	អរគុណ	no
+arkun bong	អរគុណបង	no
+orkun chraen	អរគុណច្រើន	no
+sok sabay te	សុខសប្បាយទេ	no
+soksabay	សុខសប្បាយ	no
+sok sabay jea te	សុខសប្បាយជាទេ	no
+knhom sok sabay	ខ្ញុំសុខសប្បាយ	no
+lea sen hoy	លាសិនហើយ	no
+som tos	សុំទោស	no
+ot ey te	អត់អីទេ	no
+chas	ចាស	no
+bat	បាទ	no
+ot te	អត់ទេ	no
+nham bai	ញ៉ាំបាយ	no
+nham bay hoy nov	ញ៉ាំបាយហើយនៅ	no
+klean bai	ឃ្លានបាយ	no
+chhnganh nas	ឆ្ងាញ់ណាស់	no
+nham ey	ញ៉ាំអី	no
+tov nham bai	ទៅញ៉ាំបាយ	no
+teuk	ទឹក	no
+kafe	កាហ្វេ	no
+bay cha	បាយឆា	no
+ot mean te	អត់មានទេ	no
+mean te	មានទេ	no
+knhom ot deng te	ខ្ញុំអត់ដឹងទេ	no
+jg tov	ចង់ទៅ	no
+chong tov na	ចង់ទៅណា	no
+tov na	ទៅណា	no
+mok pi na	មកពីណា	no
+nov na	នៅណា	no
+nov pteah	នៅផ្ទះ	no
+tov sala	ទៅសាលា	no
+tov rean	ទៅរៀន	no
+tveu ey	ធ្វើអី	no
+kompung tveu ey	កំពុងធ្វើអី	no
+tveu ka	ធ្វើការ	no
+chol chet	ចូលចិត្ត	no
+srolanh oun	ស្រឡាញ់អូន	no
+bong srolanh oun	បងស្រឡាញ់អូន	no
+nek oun	នឹកអូន	no
+nek bong nas	នឹកបងណាស់	no
+min deng te	មិនដឹងទេ	no
+ban hoy	បានហើយ	no
+ot ban te	អត់បានទេ	no
+ban te	បានទេ	no
+cham bontech	ចាំបន្តិច	no
+mok leng	មកលេង	no
+tov leng	ទៅលេង	no
+deng te	ដឹងទេ	no
+yol te	យល់ទេ	no
+knhom yol hoy	ខ្ញុំយល់ហើយ	no
+chea mouy	ជាមួយ	no
+mdong tiet	ម្តងទៀត	no
+pel na	ពេលណា	no
+tngai nis	ថ្ងៃនេះ	no
+saek	ស្អែក	no
+msel minh	ម្សិលមិញ	no
+yub nis	យប់នេះ	no
+pel prik	ពេលព្រឹក	no
+arun sous dey	អរុណសួស្តី	no
+reatrey sous dey	រាត្រីសួស្តី	no
+kom kheng	កុំខឹង	no
+kom pibak chet	កុំពិបាកចិត្ត	no
+pibak chet	ពិបាកចិត្ត	no
+sabay chet	សប្បាយចិត្ត	no
+ot ey te bong	អត់អីទេបង	no
+luy	លុយ	no
+ponman	ប៉ុន្មាន	no
+tlai ponman	ថ្លៃប៉ុន្មាន	no
+tlai nas	ថ្លៃណាស់	no
+thok	ថោក	no
+kom tlai pek	កុំថ្លៃពេក	no
+chit	ជិត	no
+chngay	ឆ្ងាយ	no
+srok khmer	ស្រុកខ្មែរ	no
+phnom penh	ភ្នំពេញ	no
+siem reap	សៀមរាប	no
+kampuchea	កម្ពុជា	no
+khmer	ខ្មែរ	no
+pheasa khmer	ភាសាខ្មែរ	no
+niyay khmer	និយាយខ្មែរ	no
+ches niyay khmer te	ចេះនិយាយខ្មែរទេ	no
+ot ches te	អត់ចេះទេ	no
+bong pros	បងប្រុស	no
+bong srey	បងស្រី	no
+pa mak	ប៉ាម៉ាក់	no
+mae	ម៉ែ	no
+kmeng	ក្មេង	no
+mit pheak	មិត្តភក្តិ	no
+songsa	សង្សារ	no
+saat	ស្អាត	no
+srey saat	ស្រីស្អាត	no
+saat nas	ស្អាតណាស់	no
+lor	ល្អ	no
+lor nas	ល្អណាស់	no
+ot lor te	អត់ល្អទេ	no
+chkuot	ឆ្កួត	no
+chos aeng	ចុះឯង	no
+aeng	ឯង	no
+ke	គេ	no
+yeung	យើង	no
+neak	អ្នក	no
+louk	លោក	no
+ot mean luy te	អត់មានលុយទេ	no
+tov psar	ទៅផ្សារ	no
+tinh	ទិញ	no
+lok	លក់	no
+tinh ey	ទិញអី	no
+ot toan	អត់ទាន់	no
+mok vinh	មកវិញ	no
+tov pteah	ទៅផ្ទះ	no
+cham	ចាំ	no
+ot cham te	អត់ចាំទេ	no
+kom plech	កុំភ្លេច	no
+chnam thmey	ឆ្នាំថ្មី	no
+sous dey chnam thmey	សួស្តីឆ្នាំថ្មី	no
+rean khmer	រៀនខ្មែរ	no
+tngai saek	ថ្ងៃស្អែក	no
+mouy	មួយ	no
+pi	ពីរ	no
+bei	បី	no
+ot mean wifi te	អត់មាន wifi ទេ	no
+ok bong	ok បង	no
