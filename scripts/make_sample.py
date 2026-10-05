@@ -1,7 +1,7 @@
 """Cut the small sample lexicon shipped with the package out of a full build.
 
 Keeps the most frequent words, every word that the curated chat spellings, the
-evaluation set or the tests name, and the most frequent pairs among the kept words.
+evaluation sets or the tests name, and the most frequent pairs among the kept words.
 Run `make data` first, then `make sample`.
 """
 
@@ -20,6 +20,7 @@ PACKAGE_DATA = Path("src/khmer_engine/data")
 REQUIRED_FROM = [
     PACKAGE_DATA / "chat_spellings.tsv",
     Path("eval/testset.tsv"),
+    Path("eval/native.tsv"),
     Path("tests/sample_words.txt"),
 ]
 
