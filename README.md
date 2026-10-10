@@ -177,7 +177,7 @@ written along with the engine. `eval/native.tsv` and `eval/native2.tsv` have 65 
 phrases a native speaker typed the way they chat, when shown the Khmer; they are the
 harder and more honest ones.
 
-| | Sample (3,009 words) | Full (61,980 words) |
+| | Sample (3,010 words) | Full (61,980 words) |
 |---|---|---|
 | Test set, top 1 | 88.9% | 94.4% |
 | Test set, top 5 | 97.6% | 98.4% |
@@ -208,7 +208,7 @@ the user's picks.
 These need a native speaker. Each data file has a `reviewed` column to fill in.
 
 - `eval/testset.tsv`: all 126 phrases and their Khmer
-- `src/khmer_engine/data/chat_spellings.tsv`: 13 of the 52 curated chat spellings
+- `src/khmer_engine/data/chat_spellings.tsv`: 13 of the 53 curated chat spellings
 - Choices in `phonemes.py` about how sounds are typed: short ɨ as `e` (`penh`, `nek`),
   long ɑ without a final as `or` (`orkun`, `lor`), ទៅ as `tov`
 - The examples marked † in this README

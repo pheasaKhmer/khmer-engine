@@ -61,6 +61,11 @@ def test_english_words_stay_in_latin_letters(engine, typed, expected):
     assert engine.convert(typed) == expected
 
 
+def test_loanwords_chat_writes_in_khmer_script(engine):
+    assert engine.convert("okay bong") == "អូខេបង"
+    assert engine.convert("ok bong") == "ok បង"
+
+
 def test_words_on_the_english_list_can_still_be_khmer():
     # Keeping a word in English has a cost, so a good Khmer reading in context wins.
     assert Engine(english=frozenset({"te"})).convert("ot mean te") == "អត់មានទេ"
