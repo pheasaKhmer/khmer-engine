@@ -1,0 +1,147 @@
+# Chat-style romanized Khmer typed by a native speaker, and the Khmer they meant: a
+# second batch, collected on 2026-10-10 the same way as native.tsv.
+# They were shown each Khmer phrase and typed it the way they would in a chat; nothing
+# here was written to suit the engine.
+# Columns: romanized, khmer, reviewed ("yes" once a native speaker has checked the row).
+# Before any change made for this set, the engine got 71.9% of it right on the full
+# lexicon and 68.3% on the sample.
+# romanized	khmer	reviewed
+kmeng	ក្មេង	yes
+ot ey te	អត់អីទេ	yes
+nh yul hz	ខ្ញុំយល់ហើយ	yes
+lear sen hz	លាសិនហើយ	yes
+jet	ជិត	yes
+songsa	សង្សារ	yes
+ss	សង្សារ	yes
+soursdey bong	សួស្តីបង	yes
+soursdey b	សួស្តីបង	yes
+tgnaii saek joub knea	ថ្ងៃស្អែកជួបគ្នា	yes
+Chnganh men ten	ឆ្ងាញ់មែនទែន	yes
+eng	ឯង	yes
+aeng	ឯង	yes
+kompong tver ey	កំពុងធ្វើអី	yes
+pel prek	ពេលព្រឹក	yes
+mor pi na	មកពីណា	yes
+ban hz	បានហើយ	yes
+klean bay	ឃ្លានបាយ	yes
+soursdey chnam thmey	សួស្តីឆ្នាំថ្មី	yes
+pheasa khmer	ភាសាខ្មែរ	yes
+nv na	នៅណា	yes
+jol jet	ចូលចិត្ត	yes
+jol chet	ចូលចិត្ត	yes
+ke	គេ	yes
+laor nas	ល្អណាស់	yes
+jos eng vinh	ចុះឯងវិញ	yes
+tver ey	ធ្វើអី	yes
+pel na	ពេលណា	yes
+Chhngay	ឆ្ងាយ	yes
+chnay	ឆ្ងាយ	yes
+chnam thmey	ឆ្នាំថ្មី	yes
+srey sart	ស្រីស្អាត	yes
+ot torn	អត់ទាន់	yes
+tlaii nas	ថ្លៃណាស់	yes
+tlai nas	ថ្លៃណាស់	yes
+nh nv tam plov	ខ្ញុំនៅតាមផ្លូវ	yes
+tv leng pteas nh	ទៅលេងផ្ទះខ្ញុំ	yes
+tv rean	ទៅរៀន	yes
+orkun b	អរគុណបង	yes
+orkun bong	អរគុណបង	yes
+rkun b	អរគុណបង	yes
+rkun bong	អរគុណបង	yes
+laor	ល្អ	yes
+pibak chet	ពិបាកចិត្ត	yes
+nh tver ka rouch hz	ខ្ញុំធ្វើការរួចហើយ	yes
+sok sabay te	សុខសប្បាយទេ	yes
+soursdey	សួស្តី	yes
+ot mean luy te	អត់មានលុយទេ	yes
+mdg tt	ម្តងទៀត	yes
+phgneu rub mor	ផ្ញើរូបមក	yes
+eng tv e na	ឯងនៅឯណា	yes
+tne te	ទំនេរទេ	yes
+bei	បី	yes
+bay cha	បាយឆា	yes
+muy	មួយ	yes
+mor leng	មកលេង	yes
+reartrey soursdey	រាត្រីសួស្តី	yes
+sok sabay	សុខសប្បាយ	yes
+ayuk punman hz	អាយុប៉ុន្មានហើយ	yes
+moang p'man	ម៉ោងប៉ុន្មាន	yes
+moang punman	ម៉ោងប៉ុន្មាន	yes
+keng luk sroul	គេងលក់ស្រួល	yes
+keng luk srul	គេងលក់ស្រួល	yes
+mor dol hz	មកដល់ហើយ	yes
+rean khmer	រៀនខ្មែរ	yes
+nham bay nv	ញ៉ាំបាយនៅ	yes
+kampuchea	កម្ពុជា	yes
+tenh	ទិញ	yes
+juy nh phg	ជួយខ្ញុំផង	yes
+luy os hz	លុយអស់ហើយ	yes
+p'man	ប៉ុន្មាន	yes
+punman	ប៉ុន្មាន	yes
+nh tv pteas	ខ្ញុំនៅផ្ទះ	yes
+b tver ka nv na	បងធ្វើការនៅណា	yes
+nh men jes te	ខ្ញុំមិនចេះទេ	yes
+nirk b nas	នឹកបងណាស់	yes
+nirk bong nas	នឹកបងណាស់	yes
+rean chnam ti man	រៀនឆ្នាំទីប៉ុន្មាន	yes
+rean chnam ti p'man	រៀនឆ្នាំទីប៉ុន្មាន	yes
+lork	លោក	yes
+ot mean te	អត់មានទេ	yes
+srok khmer	ស្រុកខ្មែរ	yes
+b srey	បងស្រី	yes
+ot ey te b	អត់អីទេបង	yes
+b sok sabay chea te	បងសុខសប្បាយជាទេ	yes
+b sok sbay jea te	បងសុខសប្បាយជាទេ	yes
+kom plex	កុំភ្លេច	yes
+kom plix	កុំភ្លេច	yes
+eng nham ey ng	ឯងញ៉ាំអីហ្នឹង	yes
+met pheak	មិត្តភក្តិ	yes
+okay cham joub knea	អូខេ ចាំជួបគ្នា	yes
+yy yuet yuet	និយាយយឺតៗ	yes
+nh sl eng	ខ្ញុំស្រឡាញ់ឯង	yes
+ja	ចាស	yes
+jas	ចាស	yes
+jaa	ចាស	yes
+tv leng	ទៅលេង	yes
+mix kor men chhloey	ម៉េចក៏មិនឆ្លើយ	yes
+tgnaii nis kdav nas	ថ្ងៃនេះក្តៅណាស់	yes
+orkun jren	អរគុណច្រើន	yes
+rkun jren	អរគុណច្រើន	yes
+jam nh tic	ចាំខ្ញុំបន្តិច	yes
+hav nh mork	ហៅខ្ញុំមក	yes
+sart	ស្អាត	yes
+tgnaii saek	ថ្ងៃស្អែក	yes
+nh soksabay tmd	ខ្ញុំសុខសប្បាយធម្មតា	yes
+tirk	ទឹក	yes
+kom plex na	កុំភ្លេចណា	yes
+nh ot dg te	ខ្ញុំអត់ដឹងទេ	yes
+sbay reek reay tgnaii komnart	សប្បាយរីករាយថ្ងៃកំណើត	yes
+nh yy khmer te	ចេះនិយាយខ្មែរទេ	yes
+nh nirk eng nas	ខ្ញុំនឹកឯងណាស់	yes
+chhangh nas	ឆ្ងាញ់ណាស់	yes
+nham ey	ញ៉ាំអី	yes
+nh ey te	មិនអីទេ	yes
+ot laor te	អត់ល្អទេ	yes
+dg te	ដឹងទេ	yes
+tver ka	ធ្វើការ	yes
+bart	បាទ	yes
+tv na ng	ទៅណាហ្នឹង	yes
+b sl o	បងស្រឡាញ់អូន	yes
+tv jea muy knea	ទៅជាមួយគ្នាទេ	yes
+yerng	យើង	yes
+nirk oun	នឹកអូន	yes
+chkout	ឆ្កួត	yes
+mork venh	មកវិញ	yes
+orkun soursdey	អរុណសួស្តី	yes
+rkun soursdey	អរុណសួស្តី	yes
+tgnaii p'man	ថ្លៃប៉ុន្មាន	yes
+nham bay	ញ៉ាំបាយ	yes
+tv pteas hz	ទៅផ្ទះហើយ	yes
+tgnaii nis	ថ្ងៃនេះ	yes
+nek	អ្នក	yes
+tv na	ទៅណា	yes
+cham joub knea pel kroy	ចាំជួបគ្នាពេលក្រោយ	yes
+jam joub knea pel kroy	ចាំជួបគ្នាពេលក្រោយ	yes
+nv pteas	នៅផ្ទះ	yes
+jos eng	ចុះឯង	yes
+ban te	បានទេ	yes

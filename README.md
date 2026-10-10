@@ -172,9 +172,10 @@ make eval                                            # bundled sample
 uv run python eval/evaluate.py --data data/build --failures
 ```
 
-There are two test sets. `eval/testset.tsv` has 126 phrases whose romanized side was
-written along with the engine. `eval/native.tsv` has 65 phrases a native speaker typed the
-way they chat, when shown the Khmer; it is the harder and more honest one.
+There are three test sets. `eval/testset.tsv` has 126 phrases whose romanized side was
+written along with the engine. `eval/native.tsv` and `eval/native2.tsv` have 65 and 139
+phrases a native speaker typed the way they chat, when shown the Khmer; they are the
+harder and more honest ones.
 
 | | Sample (3,009 words) | Full (61,980 words) |
 |---|---|---|
@@ -183,13 +184,15 @@ way they chat, when shown the Khmer; it is the harder and more honest one.
 | Test set, phrases of several words typed without spaces, top 1 | 83.0% | 90.4% |
 | Native speaker set, top 1 | 76.9% | 81.5% |
 | Native speaker set, top 5 | 84.6% | 89.2% |
+| Second native speaker set, top 1 | 68.3% | 71.9% |
+| Second native speaker set, top 5 | 75.5% | 77.0% |
 | `suggest` per keystroke, 5-word input | median 0.3 ms, max 1.2 ms | median 0.8 ms, max 4.1 ms |
 | Engine start | 0.1 s | 4.2 s |
 
 Before the native speaker set existed, the engine got 43% of it right: it did not know
 abbreviations (`nh`, `tv`, `hz`), dropped vowels (`sbay`) or ៗ. Some curated spellings
 come from that set, so its score is optimistic for those words; a new batch of typing
-measures it fairly. `make eval` fails if either set drops below its threshold on the sample.
+measures it fairly. `make eval` fails if any set drops below its threshold on the sample.
 
 The spec's target is under 10 ms per keystroke for a 5-word input. Most remaining errors
 need more context than one phrase gives (`luk` is លក់ "sell" or លោក "sir", `pi` is ពី
@@ -207,8 +210,8 @@ These need a native speaker. Each data file has a `reviewed` column to fill in.
   long ɑ without a final as `or` (`orkun`, `lor`), ទៅ as `tov`
 - The examples marked † in this README
 
-`eval/native.tsv` was typed by a native speaker; more batches like it are the best way to
-improve the engine.
+`eval/native.tsv` and `eval/native2.tsv` were typed by a native speaker; more batches like
+them are the best way to improve the engine.
 
 ## Porting to C++ or Rust
 
