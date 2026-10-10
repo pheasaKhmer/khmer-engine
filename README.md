@@ -173,7 +173,7 @@ uv run python eval/evaluate.py --data data/build --failures
 ```
 
 There are three test sets. `eval/testset.tsv` has 126 phrases whose romanized side was
-written along with the engine. `eval/native.tsv` and `eval/native2.tsv` have 65 and 139
+written along with the engine. `eval/native.tsv` and `eval/native2.tsv` have 65 and 137
 phrases a native speaker typed the way they chat, when shown the Khmer; they are the
 harder and more honest ones.
 
@@ -191,7 +191,7 @@ harder and more honest ones.
 
 Before the first native speaker set existed, the engine got 43% of it right: it did not
 know abbreviations (`nh`, `tv`, `hz`), dropped vowels (`sbay`) or ៗ. The second set was
-held out until then, and the engine got 71.9% of it right; it did not know more
+held out until then, and the engine got 76.6% of it right; it did not know more
 abbreviations (`nv`, `ng`, `dg`, `ss`, `p'man`) or a final x as ch (`kom plex`). Some
 curated spellings come from both sets, so their scores are optimistic for those words;
 each new batch of typing measures the engine fairly before it is used. `make eval` fails

@@ -3,9 +3,12 @@
 # They were shown each Khmer phrase and typed it the way they would in a chat; nothing
 # here was written to suit the engine.
 # Columns: romanized, khmer, reviewed ("yes" once a native speaker has checked the row).
-# Before any change made for this set, the engine got 71.9% of it right on the full
-# lexicon and 68.3% on the sample. Some curated chat spellings now come from it, so its
-# score is optimistic for those words.
+# After reviewing the misses, the native speaker corrected six rows they had mistyped
+# (tv for នៅ, which they write nv, and a dropped or wrong word) and dropped two: orkun is
+# អរគុណ, and for អរុណសួស្តី they would say good morning or soursdey.
+# Before any change made for this set, the engine got 76.6% of the corrected rows right
+# on the full lexicon and 72.3% on the sample. Some curated chat spellings now come from
+# it, so its score is optimistic for those words.
 # romanized	khmer	reviewed
 kmeng	ក្មេង	yes
 ot ey te	អត់អីទេ	yes
@@ -57,7 +60,7 @@ soursdey	សួស្តី	yes
 ot mean luy te	អត់មានលុយទេ	yes
 mdg tt	ម្តងទៀត	yes
 phgneu rub mor	ផ្ញើរូបមក	yes
-eng tv e na	ឯងនៅឯណា	yes
+eng nv e na	ឯងនៅឯណា	yes
 tne te	ទំនេរទេ	yes
 bei	បី	yes
 bay cha	បាយឆា	yes
@@ -79,7 +82,7 @@ juy nh phg	ជួយខ្ញុំផង	yes
 luy os hz	លុយអស់ហើយ	yes
 p'man	ប៉ុន្មាន	yes
 punman	ប៉ុន្មាន	yes
-nh tv pteas	ខ្ញុំនៅផ្ទះ	yes
+nh nv pteas	ខ្ញុំនៅផ្ទះ	yes
 b tver ka nv na	បងធ្វើការនៅណា	yes
 nh men jes te	ខ្ញុំមិនចេះទេ	yes
 nirk b nas	នឹកបងណាស់	yes
@@ -117,25 +120,23 @@ tirk	ទឹក	yes
 kom plex na	កុំភ្លេចណា	yes
 nh ot dg te	ខ្ញុំអត់ដឹងទេ	yes
 sbay reek reay tgnaii komnart	សប្បាយរីករាយថ្ងៃកំណើត	yes
-nh yy khmer te	ចេះនិយាយខ្មែរទេ	yes
+jes yy khmer te	ចេះនិយាយខ្មែរទេ	yes
 nh nirk eng nas	ខ្ញុំនឹកឯងណាស់	yes
 chhangh nas	ឆ្ងាញ់ណាស់	yes
 nham ey	ញ៉ាំអី	yes
-nh ey te	មិនអីទេ	yes
+men ey te	មិនអីទេ	yes
 ot laor te	អត់ល្អទេ	yes
 dg te	ដឹងទេ	yes
 tver ka	ធ្វើការ	yes
 bart	បាទ	yes
 tv na ng	ទៅណាហ្នឹង	yes
 b sl o	បងស្រឡាញ់អូន	yes
-tv jea muy knea	ទៅជាមួយគ្នាទេ	yes
+tv jea muy knea te	ទៅជាមួយគ្នាទេ	yes
 yerng	យើង	yes
 nirk oun	នឹកអូន	yes
 chkout	ឆ្កួត	yes
 mork venh	មកវិញ	yes
-orkun soursdey	អរុណសួស្តី	yes
-rkun soursdey	អរុណសួស្តី	yes
-tgnaii p'man	ថ្លៃប៉ុន្មាន	yes
+tlai p'man	ថ្លៃប៉ុន្មាន	yes
 nham bay	ញ៉ាំបាយ	yes
 tv pteas hz	ទៅផ្ទះហើយ	yes
 tgnaii nis	ថ្ងៃនេះ	yes
