@@ -54,6 +54,7 @@ def test_alternatives_start_with_the_best_conversion(engine):
         ("ok bong", "ok បង"),
         ("send photo mok", "send photo មក"),
         ("iPhone thmey", "iPhone ថ្មី"),  # the typed case is kept
+        ("good morning", "good morning"),  # not split into mor (មក) and ning (និង)
     ],
 )
 def test_english_words_stay_in_latin_letters(engine, typed, expected):
@@ -71,6 +72,9 @@ def test_words_on_the_english_list_can_still_be_khmer():
         ("soksabayte", "សុខសប្បាយទេ"),
         ("orkunbong", "អរគុណបង"),
         ("nhambayhoynov", "ញ៉ាំបាយហើយនៅ"),
+        # A one-letter abbreviation inside a typed word.
+        ("bsrey", "បងស្រី"),
+        ("orkunb", "អរគុណបង"),
     ],
 )
 def test_words_typed_without_spaces_are_split(engine, typed, expected):

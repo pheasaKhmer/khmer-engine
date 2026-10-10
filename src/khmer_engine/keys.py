@@ -5,13 +5,15 @@ People spell the same Khmer word many ways in Latin letters: "sous dey", "suosde
 which the common variants coincide, so looking a word up by its key finds it however
 it was typed. The variants folded are:
 
-- consonants: c/ch/j, chh, k/kh/g/gh/q, ph/p, th/t, w/v, nh/ny, x/s
+- consonants: c/ch/j, chh, k/kh/g/gh/q, ph/p, th/t, w/v, nh/ny, x/s, and x/ch at the
+  end of a word: "plex" is "plech" (ភ្លេច), "mix" is "mech" (ម៉េច)
 - vowel spellings that chat uses for one sound (see `VOWELS`): o/ou/u/ao, e/ae/eu/i,
   ea/ia/ie
 - a final i after another vowel, which is the glide y: "sabai" is "sabay"
 - r after a vowel, which chat uses to lengthen it: "orkun", "khmer"
 - h or s at the end of a word, which are both pronounced h: "preah", "pros"
-- doubled letters: "sabbay", and a vowel letter typed twice: "tgnaii" is "tgnai"
+- doubled letters: "sabbay", and a vowel letter typed twice: "tgnaii" is "tgnai". Only
+  inside a typed word: "yy yuet" keeps the y of "yy", which would otherwise vanish
 - diacritics and apostrophes, so UNGEGN spellings match too: "Kâmpŭchéa", "l'â"
 
 Keys are lowercase consonants and uppercase vowel groups. They are only for lookup;
@@ -105,10 +107,19 @@ def key(text: str, final: bool = True) -> str:
     """The matching key of a romanized spelling. With `final` false the text is taken
     to continue (a syllable inside a word, or a word still being typed), so the rules
     for the end of a word (dropping a last r, h or s) do not apply."""
-    units = _UNITS.findall(fold(text))
+    units: list[str] = []
+    word_starts: set[int] = set()  # indexes in `units` of the first letter of each word
+    for word in text.split():
+        letters = _UNITS.findall(fold(word))
+        if letters:
+            word_starts.add(len(units))
+            units.extend(letters)
     symbols: list[str] = []
+    symbol_starts: set[int] = set()
     i = 0
     while i < len(units):
+        if i in word_starts:
+            symbol_starts.add(len(symbols))
         if units[i] in _VOWEL_LETTERS:
             j = i
             while j < len(units) and units[j] in _VOWEL_LETTERS:
@@ -116,7 +127,8 @@ def key(text: str, final: bool = True) -> str:
             symbols.extend(_vowel_run("".join(units[i:j])))
             i = j
         else:
-            symbols.append(CONSONANTS[units[i]])
+            word_end = i + 1 == len(units) or i + 1 in word_starts
+            symbols.append("c" if units[i] == "x" and word_end else CONSONANTS[units[i]])
             i += 1
     out: list[str] = []
     for i, symbol in enumerate(symbols):
@@ -128,7 +140,7 @@ def key(text: str, final: bool = True) -> str:
             continue  # orkun, khmer
         if symbol in _FINAL_H and after_vowel and word_end:
             continue  # preah, pros
-        if out and out[-1] == symbol:
+        if out and out[-1] == symbol and i not in symbol_starts:
             continue  # sabbay
         out.append(symbol)
     return "".join(out)

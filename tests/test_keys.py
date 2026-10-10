@@ -32,6 +32,8 @@ def test_fold_keeps_lowercase_ascii_letters():
         ["kaoh", "koh"],
         ["min", "men"],
         ["tov", "tow"],
+        ["plech", "plex"],  # a final x is ch
+        ["xa", "sa"],
         # UNGEGN spellings match chat spellings.
         ["kampuchea", "Kâmpŭchéa"],
     ],
@@ -50,6 +52,13 @@ def test_variants_share_a_key(spellings):
 )
 def test_different_words_keep_different_keys(first, second):
     assert key(first) != key(second)
+
+
+def test_a_letter_repeated_across_a_space_is_kept():
+    # "yy" is និយាយ; collapsing it into the y of "yuet" would drop the word.
+    assert key("yy yuet") == "yyEt"
+    assert key("yyyuet") == "yEt"
+    assert key("sab bay") == "sAbbAy"
 
 
 def test_r_before_a_vowel_is_kept():

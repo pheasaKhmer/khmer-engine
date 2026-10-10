@@ -172,43 +172,49 @@ make eval                                            # bundled sample
 uv run python eval/evaluate.py --data data/build --failures
 ```
 
-There are two test sets. `eval/testset.tsv` has 126 phrases whose romanized side was
-written along with the engine. `eval/native.tsv` has 65 phrases a native speaker typed the
-way they chat, when shown the Khmer; it is the harder and more honest one.
+There are three test sets. `eval/testset.tsv` has 126 phrases whose romanized side was
+written along with the engine. `eval/native.tsv` and `eval/native2.tsv` have 65 and 137
+phrases a native speaker typed the way they chat, when shown the Khmer; they are the
+harder and more honest ones.
 
 | | Sample (3,009 words) | Full (61,980 words) |
 |---|---|---|
-| Test set, top 1 | 88.1% | 93.7% |
+| Test set, top 1 | 88.9% | 94.4% |
 | Test set, top 5 | 97.6% | 98.4% |
 | Test set, phrases of several words typed without spaces, top 1 | 83.0% | 90.4% |
-| Native speaker set, top 1 | 76.9% | 81.5% |
-| Native speaker set, top 5 | 84.6% | 89.2% |
+| Native speaker set, top 1 | 78.5% | 87.7% |
+| Native speaker set, top 5 | 87.7% | 93.8% |
+| Second native speaker set, top 1 | 86.9% | 94.9% |
+| Second native speaker set, top 5 | 94.2% | 99.3% |
 | `suggest` per keystroke, 5-word input | median 0.3 ms, max 1.2 ms | median 0.8 ms, max 4.1 ms |
 | Engine start | 0.1 s | 4.2 s |
 
-Before the native speaker set existed, the engine got 43% of it right: it did not know
-abbreviations (`nh`, `tv`, `hz`), dropped vowels (`sbay`) or ៗ. Some curated spellings
-come from that set, so its score is optimistic for those words; a new batch of typing
-measures it fairly. `make eval` fails if either set drops below its threshold on the sample.
+Before the first native speaker set existed, the engine got 43% of it right: it did not
+know abbreviations (`nh`, `tv`, `hz`), dropped vowels (`sbay`) or ៗ. The second set was
+held out until then, and the engine got 76.6% of it right; it did not know more
+abbreviations (`nv`, `ng`, `dg`, `ss`, `p'man`) or a final x as ch (`kom plex`). Some
+curated spellings come from both sets, so their scores are optimistic for those words;
+each new batch of typing measures the engine fairly before it is used. `make eval` fails
+if any set drops below its threshold on the sample.
 
 The spec's target is under 10 ms per keystroke for a 5-word input. Most remaining errors
 need more context than one phrase gives (`luk` is លក់ "sell" or លោក "sir", `pi` is ពី
-"from" or ពីរ "two"), or are spellings the engine reads another way: `sok sbay` as
-សោកស្តាយ, because the lexicon counts សុខសប្បាយ as one word and the pair of its halves
-is rare.
+"from" or ពីរ "two", `jet` is ជិត "near" or ចិត្ត "heart"), or are spellings the engine
+reads another way: `komnart` as កំណាត់ rather than កំណើត. The keyboard learns those from
+the user's picks.
 
 ## Checking the Khmer
 
 These need a native speaker. Each data file has a `reviewed` column to fill in.
 
 - `eval/testset.tsv`: all 126 phrases and their Khmer
-- `src/khmer_engine/data/chat_spellings.tsv`: 15 of the 39 curated chat spellings
+- `src/khmer_engine/data/chat_spellings.tsv`: 13 of the 52 curated chat spellings
 - Choices in `phonemes.py` about how sounds are typed: short ɨ as `e` (`penh`, `nek`),
   long ɑ without a final as `or` (`orkun`, `lor`), ទៅ as `tov`
 - The examples marked † in this README
 
-`eval/native.tsv` was typed by a native speaker; more batches like it are the best way to
-improve the engine.
+`eval/native.tsv` and `eval/native2.tsv` were typed by a native speaker; more batches like
+them are the best way to improve the engine.
 
 ## Porting to C++ or Rust
 
