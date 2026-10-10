@@ -95,6 +95,10 @@ class Engine:
             Choice(word, emission, form.source, form.spelling)
             for word, (emission, form) in self.matcher.emissions(typed, fuzzy_keys=whole).items()
         ]
+        if not whole and len(typed) == 1:
+            # A letter inside a typed word is only a hand-written abbreviation, like the b
+            # of "bsrey": as anything else it would split too many words.
+            out = [c for c in out if c.source == "curated" and c.spelling == typed.lower()]
         if whole and typed.lower() in self.english:
             out.append(Choice(typed, 0.0, "english", typed.lower()))
         if whole and " " not in typed:

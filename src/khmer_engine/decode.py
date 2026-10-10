@@ -68,6 +68,7 @@ class Settings:
     split: float = 1.0  # cost per split inside a typed word ("soksabay|te")
     max_words_per_span: int = 3
     min_split_length: int = 4  # shorter typed words are never split
+    min_piece_length: int = 1  # "b" in "bsrey"; the choices decide what a letter can be
     max_piece_length: int = 12
     choices_per_span: int = 8
     beam: int = 8
@@ -234,7 +235,8 @@ class Decoder:
             if len(word) < settings.min_split_length:
                 continue
             for a in range(len(word)):
-                for b in range(a + 2, min(a + settings.max_piece_length, len(word)) + 1):
+                first = a + settings.min_piece_length
+                for b in range(first, min(a + settings.max_piece_length, len(word)) + 1):
                     if a == 0 and b == len(word):
                         continue  # the whole word is above
                     # Charge each split once, on the piece that ends inside the word.

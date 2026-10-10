@@ -71,6 +71,9 @@ def test_words_on_the_english_list_can_still_be_khmer():
         ("soksabayte", "សុខសប្បាយទេ"),
         ("orkunbong", "អរគុណបង"),
         ("nhambayhoynov", "ញ៉ាំបាយហើយនៅ"),
+        # A one-letter abbreviation inside a typed word.
+        ("bsrey", "បងស្រី"),
+        ("orkunb", "អរគុណបង"),
     ],
 )
 def test_words_typed_without_spaces_are_split(engine, typed, expected):
