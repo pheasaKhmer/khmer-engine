@@ -54,6 +54,7 @@ def test_alternatives_start_with_the_best_conversion(engine):
         ("ok bong", "ok បង"),
         ("send photo mok", "send photo មក"),
         ("iPhone thmey", "iPhone ថ្មី"),  # the typed case is kept
+        ("good morning", "good morning"),  # not split into mor (មក) and ning (និង)
     ],
 )
 def test_english_words_stay_in_latin_letters(engine, typed, expected):

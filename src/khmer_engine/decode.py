@@ -234,6 +234,8 @@ class Decoder:
         for i, (word, _, _) in enumerate(phrase.words):
             if len(word) < settings.min_split_length:
                 continue
+            if any(c.source == "english" for c in self.choices(word, True)):
+                continue  # an English word stays whole: "morning" is not មក + និង
             for a in range(len(word)):
                 first = a + settings.min_piece_length
                 for b in range(first, min(a + settings.max_piece_length, len(word)) + 1):
