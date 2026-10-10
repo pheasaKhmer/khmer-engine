@@ -4,7 +4,8 @@
 # here was written to suit the engine.
 # Columns: romanized, khmer, reviewed ("yes" once a native speaker has checked the row).
 # Before any change made for this set, the engine got 71.9% of it right on the full
-# lexicon and 68.3% on the sample.
+# lexicon and 68.3% on the sample. Some curated chat spellings now come from it, so its
+# score is optimistic for those words.
 # romanized	khmer	reviewed
 kmeng	ក្មេង	yes
 ot ey te	អត់អីទេ	yes
