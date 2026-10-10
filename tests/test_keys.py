@@ -32,6 +32,8 @@ def test_fold_keeps_lowercase_ascii_letters():
         ["kaoh", "koh"],
         ["min", "men"],
         ["tov", "tow"],
+        ["plech", "plex"],  # a final x is ch
+        ["xa", "sa"],
         # UNGEGN spellings match chat spellings.
         ["kampuchea", "Kâmpŭchéa"],
     ],
