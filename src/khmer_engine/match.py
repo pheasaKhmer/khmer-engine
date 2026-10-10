@@ -151,7 +151,7 @@ class Matcher:
     def emissions(self, text: str, *, fuzzy_keys: bool = True) -> dict[str, tuple[float, Form]]:
         """Each candidate word with its emission score and the form that matched best."""
         typed = fold(text)
-        typed_key = key(typed)
+        typed_key = key(text)
         if not typed_key:
             return {}
         hits: list[tuple[Form, int]] = [(f, 0) for f in self.index.get(typed_key, ())]
